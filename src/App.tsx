@@ -87,9 +87,9 @@ export default function App() {
     try {
       const result = await evaluateJobFit(dossierContent, jobDescription);
       setEvaluation(result);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Evaluation failed:", error);
-      alert("Failed to evaluate job fit. Please try again.");
+      alert(`Failed to evaluate job fit: ${error instanceof Error ? error.message : error}`);
     } finally {
       setIsEvaluating(false);
     }
@@ -103,9 +103,9 @@ export default function App() {
       setDocuments(result);
       // Trigger support modal after successful generation
       setTimeout(() => setShowSupportModal(true), 1500);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Document generation failed:", error);
-      alert("Failed to generate documents. Please try again.");
+      alert(`Failed to generate documents: ${error instanceof Error ? error.message : error}`);
     } finally {
       setIsGenerating(false);
     }

@@ -27,7 +27,7 @@ export async function evaluateJobFit(
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || 'Failed to evaluate job fit');
+    throw new Error(errorData.error || `Failed to evaluate job fit (${response.status}: ${response.statusText})`);
   }
 
   return response.json();
@@ -47,7 +47,7 @@ export async function generateDocuments(
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || 'Failed to generate documents');
+    throw new Error(errorData.error || `Failed to generate documents (${response.status}: ${response.statusText})`);
   }
 
   return response.json();
