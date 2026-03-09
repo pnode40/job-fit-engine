@@ -1,0 +1,54 @@
+export interface JobFitEvaluation {
+  matchScore: number;
+  goodFitReasons: string[];
+  badFitReasons: string[];
+  recommendation: "APPLY" | "DO_NOT_APPLY";
+  recommendationReasoning: string;
+  keywords: { skill: string; matched: boolean }[];
+}
+
+export interface GeneratedDocuments {
+  resumeMarkdown: string;
+  coverLetterMarkdown: string;
+  interviewPlaybookMarkdown: string;
+}
+
+export async function evaluateJobFit(
+  dossier: string,
+  jobDescription: string
+): Promise<JobFitEvaluation> {
+  const response = await fetch('/api/evaluate', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ dossier, jobDescription }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to evaluate job fit');
+  }
+
+  return response.json();
+}
+
+export async function generateDocuments(
+  dossier: string,
+  jobDescription: string
+): Promise<GeneratedDocuments> {
+  const response = await fetch('/api/generate', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ dossier, jobDescription }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to generate documents');
+  }
+
+  return response.json();
+}

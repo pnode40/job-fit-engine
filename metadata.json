@@ -1,0 +1,5 @@
+{
+  "name": "Job Fit Engine",
+  "description": "Evaluate job descriptions against your professional dossier and generate tailored ATS-optimized resumes and cover letters.",
+  "requestFramePermissions": []
+}
