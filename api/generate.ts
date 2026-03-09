@@ -1,12 +1,9 @@
+import { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenAI, Type } from "@google/genai";
 
-export const config = {
-  runtime: 'edge',
-};
-
-export default async function handler(req: Request) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   // 1. Strict Origin Validation
-  const origin = req.headers.get('origin') || '';
+  const origin = req.headers.origin || '';
   const allowedOrigin = process.env.ALLOWED_ORIGIN || process.env.APP_URL || 'http://localhost:3000';
 
   let isAllowed = false;
@@ -15,48 +12,32 @@ export default async function handler(req: Request) {
   else if (origin.endsWith('.vercel.app')) isAllowed = true;
 
   if (!isAllowed) {
-    return new Response(JSON.stringify({ error: 'Forbidden' }), {
-      status: 403,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    return res.status(403).json({ error: 'Forbidden' });
   }
 
-  // 2. Preflight CORS Request Handling (Critical for Edge)
+  // 2. Preflight CORS Request Handling
+  res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
   if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      status: 200,
-      headers: {
-        'Access-Control-Allow-Origin': allowedOrigin,
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      },
-    });
+    return res.status(200).end();
   }
 
   if (req.method !== 'POST') {
-    return new Response(
-      JSON.stringify({ error: 'Method Not Allowed' }),
-      { status: 405, headers: { 'Content-Type': 'application/json' } }
-    );
+    return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
   try {
-    const body = await req.json();
-    const { dossier, jobDescription } = body;
+    const { dossier, jobDescription } = req.body || {};
     const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
-      return new Response(
-        JSON.stringify({ error: 'Server configuration error: Missing API Key' }),
-        { status: 500, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': allowedOrigin } }
-      );
+      return res.status(500).json({ error: 'Server configuration error: Missing API Key' });
     }
 
     if (!dossier || !jobDescription) {
-      return new Response(JSON.stringify({ error: 'Missing dossier or jobDescription' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': allowedOrigin }
-      });
+      return res.status(400).json({ error: 'Missing dossier or jobDescription' });
     }
 
     const ai = new GoogleGenAI({ apiKey });
@@ -147,22 +128,10 @@ ${jobDescription}
 
     const documents = JSON.parse(text);
 
-    return new Response(
-      JSON.stringify(documents),
-      {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': allowedOrigin
-        }
-      }
-    );
+    return res.status(200).json(documents);
 
   } catch (error: any) {
     console.error("Generation error:", error);
-    return new Response(
-      JSON.stringify({ error: error.message || 'Internal Server Error' }),
-      { status: 500, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': allowedOrigin } }
-    );
+    return res.status(500).json({ error: error.message || 'Internal Server Error' });
   }
 }
