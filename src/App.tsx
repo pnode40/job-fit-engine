@@ -16,6 +16,7 @@ export default function App() {
   const [dossierContent, setDossierContent] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [activeStep, setActiveStep] = useState(1);
+  const [activeTab, setActiveTab] = useState("resume");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [isEvaluating, setIsEvaluating] = useState(false);
@@ -30,8 +31,8 @@ export default function App() {
 
   const [showSupportModal, setShowSupportModal] = useState(false);
 
-  const resumeRef = useRef<HTMLDivElement>(null);
-  const handlePrint = useReactToPrint({ contentRef: resumeRef });
+  const printRef = useRef<HTMLDivElement>(null);
+  const handlePrint = useReactToPrint({ contentRef: printRef });
 
   useEffect(() => {
     const savedDossier = localStorage.getItem("job-fit-master-dossier");
@@ -391,12 +392,12 @@ export default function App() {
                       New Application
                     </Button>
                     <Button onClick={() => handlePrint()} variant="outline" className="bg-blue-600/20 border-blue-500/30 text-blue-300 hover:bg-blue-600/30">
-                      <Download className="w-4 h-4 mr-2" /> Export PDF
+                      <Download className="w-4 h-4 mr-2" /> Export {activeTab === "resume" ? "Resume" : activeTab === "coverLetter" ? "Cover Letter" : "Playbook"} PDF
                     </Button>
                   </div>
                 </div>
 
-                <Tabs defaultValue="resume" className="w-full">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                   <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-3 mb-8 bg-zinc-900/80 border border-zinc-800 p-1.5 rounded-xl">
                     <TabsTrigger value="resume" className="rounded-lg data-[state=active]:bg-zinc-800 data-[state=active]:text-white">ATS Resume</TabsTrigger>
                     <TabsTrigger value="coverLetter" className="rounded-lg data-[state=active]:bg-zinc-800 data-[state=active]:text-white">Cover Letter</TabsTrigger>
@@ -405,49 +406,6 @@ export default function App() {
 
                   <TabsContent value="resume" className="space-y-4">
                     <div className="flex justify-end"><Button variant="ghost" size="sm" onClick={() => copyToClipboard(documents.resumeMarkdown, 'resume')} className="text-zinc-400">{copiedResume ? "Copied!" : "Copy Markdown"}</Button></div>
-                    <div className="hidden">
-                      <div ref={resumeRef} className="print-container bg-white text-black font-sans w-full max-w-[850px] mx-auto pb-12">
-                        <style type="text/css" media="print">
-                          {`
-                            @page {
-                              size: letter;
-                              margin: 0.5in 0.5in 0.5in 0.5in;
-                            }
-                            
-                            /* Hide browser headers/footers in some browsers by forcing content to edge of @page margin */
-                            html, body {
-                              margin: 0 !important;
-                              padding: 0 !important;
-                            }
-
-                            .print-container { 
-                              font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-                              font-size: 11px; 
-                              line-height: 1.4; 
-                              color: #27272a; /* text-zinc-800 */
-                            }
-                            .print-container > * { page-break-inside: avoid; break-inside: avoid; }
-                            .print-container h1, .print-container h2, .print-container h3 { page-break-after: avoid; break-after: avoid; }
-                            
-                            /* Typography Spacing */
-                            .print-container h1 { font-size: 24px; font-weight: 800; color: #09090b; margin-bottom: 2px; text-transform: uppercase; letter-spacing: -0.01em; }
-                            .print-container h1 + p { font-size: 11px; color: #52525b; margin-top: 0; margin-bottom: 24px; font-weight: 500; }
-                            
-                            .print-container h2 { font-size: 12px; font-weight: 700; text-transform: uppercase; color: #09090b; border-bottom: 1.5px solid #e4e4e7; padding-bottom: 4px; margin-top: 20px; margin-bottom: 12px; letter-spacing: 0.05em; }
-                            
-                            .print-container h3 { font-size: 11.5px; font-weight: 700; color: #18181b; margin-top: 16px; margin-bottom: 4px; }
-                            .print-container h3 + p { margin-top: 0; margin-bottom: 6px; font-style: italic; color: #52525b; }
-                            
-                            .print-container p { margin-bottom: 8px; }
-                            .print-container ul { margin-left: 16px; margin-bottom: 12px; list-style-type: disc; }
-                            .print-container li { margin-bottom: 4px; padding-left: 4px; }
-                            .print-container li::marker { color: #a1a1aa; }
-                            .print-container strong { font-weight: 700; color: #09090b; }
-                          `}
-                        </style>
-                        <Markdown>{documents.resumeMarkdown}</Markdown>
-                      </div>
-                    </div>
                     <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-2xl p-8 md:p-12 prose prose-invert max-w-none prose-sm sm:prose-base shadow-xl"><Markdown>{documents.resumeMarkdown}</Markdown></div>
                   </TabsContent>
                   <TabsContent value="coverLetter" className="space-y-4">
@@ -459,16 +417,51 @@ export default function App() {
                     <div className="bg-gradient-to-br from-blue-900/10 to-indigo-900/10 border border-blue-900/30 rounded-2xl p-8 md:p-12 prose prose-invert max-w-none prose-sm sm:prose-base shadow-xl"><Markdown>{documents.interviewPlaybookMarkdown}</Markdown></div>
                   </TabsContent>
                 </Tabs>
+
+                {/* Unified Hidden Print Container */}
+                <div className="hidden">
+                  <div ref={printRef} className="print-container">
+                    <style type="text/css" media="print">
+                      {`
+                        @page { size: letter; margin: 0; }
+                        .print-container {
+                          font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                          font-size: 11px;
+                          line-height: 1.4;
+                          color: #27272a;
+                          padding: 0.5in 0.6in;
+                          -webkit-box-decoration-break: clone;
+                          box-decoration-break: clone;
+                        }
+                        .print-container > * { page-break-inside: avoid; break-inside: avoid; }
+                        .print-container h1, .print-container h2, .print-container h3 { page-break-after: avoid; break-after: avoid; }
+                        .print-container h1 { font-size: 22px; font-weight: 800; color: #09090b; margin: 0 0 2px 0; text-transform: uppercase; letter-spacing: -0.01em; }
+                        .print-container h1 + p { font-size: 10.5px; color: #52525b; margin: 0 0 16px 0; font-weight: 500; }
+                        .print-container h2 { font-size: 11.5px; font-weight: 700; text-transform: uppercase; color: #09090b; border-bottom: 1.5px solid #d4d4d8; padding-bottom: 3px; margin: 16px 0 8px 0; letter-spacing: 0.05em; }
+                        .print-container h3 { font-size: 11px; font-weight: 700; color: #18181b; margin: 12px 0 2px 0; }
+                        .print-container h3 + p { margin: 0 0 4px 0; font-style: italic; color: #52525b; font-size: 10.5px; }
+                        .print-container p { margin: 0 0 6px 0; }
+                        .print-container ul { margin: 0 0 8px 16px; list-style-type: disc; padding: 0; }
+                        .print-container li { margin: 0 0 2px 0; padding-left: 2px; }
+                        .print-container li::marker { color: #a1a1aa; }
+                        .print-container strong { font-weight: 700; color: #09090b; }
+                      `}
+                    </style>
+                    {activeTab === "resume" && <Markdown>{documents.resumeMarkdown}</Markdown>}
+                    {activeTab === "coverLetter" && <Markdown>{documents.coverLetterMarkdown}</Markdown>}
+                    {activeTab === "playbook" && <Markdown>{documents.interviewPlaybookMarkdown}</Markdown>}
+                  </div>
+                </div>
               </motion.div>
             )}
 
           </AnimatePresence>
         </div>
-      </main>
+      </main >
 
       <Dialog open={showSupportModal} onOpenChange={setShowSupportModal}>
         <DialogContent className="max-w-md bg-zinc-950 border-zinc-800 text-zinc-100"><DialogHeader><DialogTitle>Success!</DialogTitle></DialogHeader><Button onClick={() => setShowSupportModal(false)}>Close</Button></DialogContent>
       </Dialog>
-    </div>
+    </div >
   );
 }
