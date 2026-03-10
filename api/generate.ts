@@ -90,6 +90,32 @@ You MUST follow this exact Markdown structure for the entire resume to ensure th
 ## EDUCATION & CERTIFICATIONS
 ... (list education)
 
+CRITICAL FORMATTING INSTRUCTIONS FOR COVER LETTER:
+You MUST follow this exact Markdown structure for the entire cover letter to ensure the PDF renderer works correctly:
+
+# [Candidate Name]
+[Contact Line 1: email | phone]
+[Contact Line 2: location | linkedin]
+
+**[Date]**
+
+**[Hiring Manager Name or "Hiring Team"]**
+[Company Name]
+
+**RE: Application for [Job Title]**
+
+Dear [Hiring Manager Name or "Hiring Team"],
+
+[Paragraph 1: Hook and alignment]
+
+[Paragraph 2: Core competency and proof]
+
+[Paragraph 3: Closing and call to action]
+
+Sincerely,
+
+**[Candidate Name]**
+
 Candidate Dossier:
 ${dossier}
 
