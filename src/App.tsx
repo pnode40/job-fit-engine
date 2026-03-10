@@ -331,6 +331,13 @@ export default function App() {
                       </Badge>
                     </div>
                     <p className="text-sm text-zinc-300 mt-4 leading-relaxed bg-black/20 p-4 rounded-xl border border-white/5">{evaluation.recommendationReasoning}</p>
+
+                    <div className="mt-4 bg-blue-950/20 p-4 rounded-xl border border-blue-900/40">
+                      <h4 className="text-xs font-semibold text-blue-400 uppercase tracking-wider mb-2 flex items-center">
+                        <TrendingUp className="w-3.5 h-3.5 mr-1.5" /> Scope & Leveling Calibration
+                      </h4>
+                      <p className="text-sm text-blue-200/80 leading-relaxed">{evaluation.levelingAnalysis}</p>
+                    </div>
                   </div>
                 </div>
 

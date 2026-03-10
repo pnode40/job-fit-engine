@@ -1,4 +1,5 @@
 export interface JobFitEvaluation {
+  levelingAnalysis: string;
   matchScore: number;
   goodFitReasons: string[];
   badFitReasons: string[];

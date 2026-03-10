@@ -52,6 +52,7 @@ CRITICAL RULES:
 2. IMPLICIT TRANSLATION: You may translate explicit achievements into required skills if the connection is undeniable (e.g., managing a $5M P&L implies Financial Acumen), but you must explicitly state the source of your translation in your reasoning.
 3. CLAIM + PROOF STRUCTURE: Every single 'goodFitReason' must follow a Claim + Proof structure. For example: "Candidate meets the [Skill] requirement, proven by their experience [Exact Metric/Achievement from Dossier]." Do not write generic praise.
 4. BE RUTHLESS: This is a pro-grade platform. If the candidate is a weak fit, say so clearly. Do not inflate the match score.
+5. CALIBRATE FOR SENIORITY & SCALE: You must aggressively evaluate the career level, scope of responsibility, and implicit compensation band of the Job Description against the candidate's actual track record. Keyword matches do not equal level matches. If the scale of the role (e.g. Director/VP $250K+) far exceeds the candidate's demonstrated scope, penalize the match score heavily and explain why.
 
 Candidate Dossier:
 ${dossier}
@@ -64,10 +65,15 @@ ${jobDescription}
       model: "gemini-2.5-pro",
       contents: prompt,
       config: {
+        temperature: 0.1,
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
           properties: {
+            levelingAnalysis: {
+              type: Type.STRING,
+              description: "A strict analysis comparing the seniority, scale, and expected trajectory of the target role against the candidate's actual footprint. Must define the 'gap' if one exists.",
+            },
             matchScore: {
               type: Type.INTEGER,
               description: "A score from 0 to 100 representing how well the candidate fits the job description.",
@@ -103,7 +109,7 @@ ${jobDescription}
               }
             }
           },
-          required: ["matchScore", "goodFitReasons", "badFitReasons", "recommendation", "recommendationReasoning", "keywords"],
+          required: ["levelingAnalysis", "matchScore", "goodFitReasons", "badFitReasons", "recommendation", "recommendationReasoning", "keywords"],
         },
       },
     });
