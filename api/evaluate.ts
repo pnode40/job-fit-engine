@@ -11,10 +11,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   ].filter(Boolean) as string[];
 
   const origin = req.headers.origin as string | undefined;
-  // Require an explicit Origin in production; allow missing origin only in local dev
-  const isAllowed = origin
-    ? allowedOrigins.includes(origin)
-    : !process.env.ALLOWED_ORIGIN;
+  // Allow same-origin requests (no Origin header) or cross-origin from allowlist
+  const isAllowed = !origin || allowedOrigins.includes(origin);
 
   if (!isAllowed) {
     return res.status(403).json({ error: 'Forbidden' });
