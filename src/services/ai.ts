@@ -1,6 +1,9 @@
 export interface JobFitEvaluation {
   levelingAnalysis: string;
   matchScore: number;
+  skillsScore: number;
+  seniorityScore: number;
+  domainScore: number;
   goodFitReasons: string[];
   badFitReasons: string[];
   recommendation: "APPLY" | "DO_NOT_APPLY";
