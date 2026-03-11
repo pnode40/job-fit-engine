@@ -21,11 +21,12 @@ export function IngestionView({ dossierContent, jobDescription }: IngestionViewP
   const [phaseIndex, setPhaseIndex] = useState(0);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setPhaseIndex((i) => Math.min(i + 1, PHASES.length - 1));
+    if (phaseIndex >= PHASES.length - 1) return;
+    const timeout = setTimeout(() => {
+      setPhaseIndex((i) => i + 1);
     }, 900);
-    return () => clearInterval(interval);
-  }, []);
+    return () => clearTimeout(timeout);
+  }, [phaseIndex]);
 
   const dossierLines = dossierContent.trim().split("\n").filter(Boolean).slice(0, 10);
   const jdLines = jobDescription.trim().split("\n").filter(Boolean).slice(0, 10);

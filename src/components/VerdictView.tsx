@@ -310,6 +310,8 @@ export function VerdictView({
           size="lg"
           onClick={handleCTA}
           disabled={isGenerating || tier === 4}
+          aria-disabled={tier === 4}
+          aria-label={tier === 4 ? "Asset generation disabled: match score too low to proceed" : undefined}
           className={cn(
             "rounded-full px-7 h-11 font-semibold text-white transition-all",
             tier === 4 ? "opacity-40 cursor-not-allowed bg-zinc-800" : config.ctaClass

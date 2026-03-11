@@ -87,17 +87,21 @@ export function AssetFactory({
       setSandboxOpen(false);
       return;
     }
-    const updated = localResume.replace(sandboxOriginal, sandboxEdit);
+    const updated = localResume.replaceAll(sandboxOriginal, sandboxEdit);
     setLocalResume(updated);
     onUpdateResume(updated);
     setSandboxOpen(false);
   };
 
   const copy = async (text: string, type: "resume" | "cover" | "playbook") => {
-    await navigator.clipboard.writeText(text);
-    if (type === "resume") { setCopiedResume(true); setTimeout(() => setCopiedResume(false), 2000); }
-    else if (type === "cover") { setCopiedCover(true); setTimeout(() => setCopiedCover(false), 2000); }
-    else { setCopiedPlaybook(true); setTimeout(() => setCopiedPlaybook(false), 2000); }
+    try {
+      await navigator.clipboard.writeText(text);
+      if (type === "resume") { setCopiedResume(true); setTimeout(() => setCopiedResume(false), 2000); }
+      else if (type === "cover") { setCopiedCover(true); setTimeout(() => setCopiedCover(false), 2000); }
+      else { setCopiedPlaybook(true); setTimeout(() => setCopiedPlaybook(false), 2000); }
+    } catch {
+      alert("Clipboard access denied. Please copy the text manually.");
+    }
   };
 
   // Keyword live-check for sandbox modal

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   evaluateJobFit,
   generateDocuments,
@@ -43,7 +43,7 @@ export default function App() {
   const [documents, setDocuments] = useState<GeneratedDocuments | null>(null);
   const [pitchMode, setPitchMode] = useState(false);
 
-  const fileInputRef = { current: null as HTMLInputElement | null };
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const savedDossier = localStorage.getItem("job-fit-master-dossier");
@@ -127,7 +127,7 @@ export default function App() {
   const unlockedStep = () => {
     if (documents) return 4;
     if (evaluation) return 3;
-    if (jobDescription.length > 50 && dossierContent.length > 50) return 2;
+    if (jobDescription.trim().length > 50 && dossierContent.trim().length > 50) return 2;
     return 1;
   };
 
@@ -236,7 +236,7 @@ export default function App() {
                       type="file"
                       accept=".txt,.md,.csv"
                       className="hidden"
-                      ref={(el) => { fileInputRef.current = el; }}
+                      ref={fileInputRef}
                       onChange={handleFileUpload}
                     />
                     <Button
@@ -250,7 +250,7 @@ export default function App() {
                     <Button
                       size="lg"
                       onClick={() => setActiveStep(2)}
-                      disabled={dossierContent.length < 50}
+                      disabled={dossierContent.trim().length < 50}
                       className="bg-white text-black hover:bg-zinc-200 font-bold px-8 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
                     >
                       Next: Target Role <ArrowRight className="ml-2 w-4 h-4" />

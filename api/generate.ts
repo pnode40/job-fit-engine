@@ -3,20 +3,25 @@ import { GoogleGenAI, Type } from "@google/genai";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // 1. Strict Origin Validation
-  const origin = req.headers.origin || '';
-  const allowedOrigin = process.env.ALLOWED_ORIGIN || process.env.APP_URL || 'http://localhost:3000';
+  const allowedOrigins = [
+    process.env.ALLOWED_ORIGIN,
+    process.env.APP_URL,
+    'http://localhost:3000',
+    'http://localhost:5173',
+  ].filter(Boolean) as string[];
 
-  let isAllowed = false;
-  if (!origin) isAllowed = true;
-  else if (origin === allowedOrigin) isAllowed = true;
-  else if (origin.endsWith('.vercel.app')) isAllowed = true;
+  const origin = req.headers.origin as string | undefined;
+  // Require an explicit Origin in production; allow missing origin only in local dev
+  const isAllowed = origin
+    ? allowedOrigins.includes(origin)
+    : !process.env.ALLOWED_ORIGIN;
 
   if (!isAllowed) {
     return res.status(403).json({ error: 'Forbidden' });
   }
 
   // 2. Preflight CORS Request Handling
-  res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
+  res.setHeader('Access-Control-Allow-Origin', origin ?? 'http://localhost:3000');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
@@ -38,6 +43,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (!dossier || !jobDescription) {
       return res.status(400).json({ error: 'Missing dossier or jobDescription' });
+    }
+    if (typeof dossier !== 'string' || typeof jobDescription !== 'string') {
+      return res.status(400).json({ error: 'dossier and jobDescription must be strings' });
+    }
+    const MAX_CHARS = 50_000;
+    if (dossier.length > MAX_CHARS || jobDescription.length > MAX_CHARS) {
+      return res.status(400).json({ error: `Input exceeds maximum length of ${MAX_CHARS} characters` });
     }
 
     const ai = new GoogleGenAI({ apiKey });
@@ -154,10 +166,18 @@ ${jobDescription}
 
     const documents = JSON.parse(text);
 
+    // Validate all three documents are non-empty strings
+    const docFields = ['resumeMarkdown', 'coverLetterMarkdown', 'interviewPlaybookMarkdown'];
+    for (const field of docFields) {
+      if (typeof documents[field] !== 'string' || !documents[field].trim()) {
+        throw new Error(`Invalid generation response: '${field}' missing or empty`);
+      }
+    }
+
     return res.status(200).json(documents);
 
   } catch (error: any) {
     console.error("Generation error:", error);
-    return res.status(500).json({ error: error.message || 'Internal Server Error' });
+    return res.status(500).json({ error: 'Document generation failed. Please try again.' });
   }
 }
