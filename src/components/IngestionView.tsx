@@ -3,12 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Shield, Target } from "lucide-react";
 import { cn } from "../lib/utils";
 
-interface IngestionViewProps {
-  dossierContent: string;
-  jobDescription: string;
-}
-
-const PHASES = [
+const ASSESSMENT_PHASES = [
   "Normalizing Dossier Schema",
   "Extracting JD Lexicon",
   "Cross-referencing Core Competencies",
@@ -17,16 +12,43 @@ const PHASES = [
   "Generating Fit Assessment",
 ];
 
-export function IngestionView({ dossierContent, jobDescription }: IngestionViewProps) {
+export const GENERATION_PHASES = [
+  "Synthesizing Career Narrative",
+  "Drafting ATS-Optimized Resume",
+  "Calibrating Keyword Density",
+  "Composing Cover Letter",
+  "Building Interview Playbook",
+  "Finalizing Your Assets",
+];
+
+interface IngestionViewProps {
+  dossierContent: string;
+  jobDescription: string;
+  phases?: string[];
+  title?: string;
+  phaseIntervalMs?: number;
+}
+
+export function IngestionView({
+  dossierContent,
+  jobDescription,
+  phases = ASSESSMENT_PHASES,
+  title = "Forensic Analysis in Progress",
+  phaseIntervalMs = 900,
+}: IngestionViewProps) {
   const [phaseIndex, setPhaseIndex] = useState(0);
 
   useEffect(() => {
-    if (phaseIndex >= PHASES.length - 1) return;
+    setPhaseIndex(0);
+  }, [phases]);
+
+  useEffect(() => {
+    if (phaseIndex >= phases.length - 1) return;
     const timeout = setTimeout(() => {
       setPhaseIndex((i) => i + 1);
-    }, 900);
+    }, phaseIntervalMs);
     return () => clearTimeout(timeout);
-  }, [phaseIndex]);
+  }, [phaseIndex, phases, phaseIntervalMs]);
 
   const dossierLines = dossierContent.trim().split("\n").filter(Boolean).slice(0, 10);
   const jdLines = jobDescription.trim().split("\n").filter(Boolean).slice(0, 10);
@@ -42,7 +64,7 @@ export function IngestionView({ dossierContent, jobDescription }: IngestionViewP
     >
       <div className="text-center space-y-1">
         <p className="text-[10px] text-zinc-600 uppercase tracking-[0.2em] font-semibold">
-          Forensic Analysis in Progress
+          {title}
         </p>
       </div>
 
@@ -147,13 +169,13 @@ export function IngestionView({ dossierContent, jobDescription }: IngestionViewP
           >
             <Loader2 className="w-3.5 h-3.5 text-blue-400 animate-spin" />
             <span className="text-xs text-zinc-400 font-mono tracking-wide">
-              {PHASES[phaseIndex]}
+              {phases[phaseIndex]}
             </span>
           </motion.div>
         </AnimatePresence>
 
         <div className="flex gap-1.5 mt-1">
-          {PHASES.map((_, i) => (
+          {phases.map((_, i) => (
             <motion.div
               key={i}
               className={cn(

@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { cn } from "./lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import { IngestionView } from "./components/IngestionView";
+import { IngestionView, GENERATION_PHASES } from "./components/IngestionView";
 import { VerdictView } from "./components/VerdictView";
 import { AssetFactory } from "./components/AssetFactory";
 
@@ -325,8 +325,19 @@ export default function App() {
               />
             )}
 
+            {/* Asset generation loading */}
+            {activeStep === 3 && isGenerating && (
+              <IngestionView
+                dossierContent={dossierContent}
+                jobDescription={jobDescription}
+                phases={GENERATION_PHASES}
+                title="Crafting Your Assets"
+                phaseIntervalMs={8000}
+              />
+            )}
+
             {/* STEP 3: Verdict */}
-            {activeStep === 3 && evaluation && tier && (
+            {activeStep === 3 && evaluation && tier && !isGenerating && (
               <VerdictView
                 key="verdict"
                 evaluation={evaluation}
