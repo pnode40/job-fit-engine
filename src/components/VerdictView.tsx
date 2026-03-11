@@ -309,12 +309,10 @@ export function VerdictView({
         <Button
           size="lg"
           onClick={handleCTA}
-          disabled={isGenerating || tier === 4}
-          aria-disabled={tier === 4}
-          aria-label={tier === 4 ? "Asset generation disabled: match score too low to proceed" : undefined}
+          disabled={isGenerating}
           className={cn(
             "rounded-full px-7 h-11 font-semibold text-white transition-all",
-            tier === 4 ? "opacity-40 cursor-not-allowed bg-zinc-800" : config.ctaClass
+            config.ctaClass
           )}
         >
           {isGenerating ? (
@@ -329,16 +327,6 @@ export function VerdictView({
             </>
           )}
         </Button>
-        {tier === 4 && (
-          <Button
-            size="lg"
-            onClick={onAnalyzeAnother}
-            variant="outline"
-            className="rounded-full px-7 h-11 bg-zinc-900 border-zinc-700 text-zinc-300 hover:text-white"
-          >
-            <RotateCcw className="mr-2 h-4 w-4" /> Analyze Another Role
-          </Button>
-        )}
       </div>
     </motion.div>
   );
