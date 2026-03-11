@@ -1,7 +1,6 @@
 {
   "buildCommand": "vite build",
   "outputDirectory": "dist",
-  "installCommand": "npm install",
   "rewrites": [
     { "source": "/api/evaluate", "destination": "/api/evaluate" },
     { "source": "/api/generate", "destination": "/api/generate" },

@@ -1,8 +1,8 @@
 import "dotenv/config";
 import express from "express";
 import { createServer as createViteServer } from "vite";
-import evaluateHandler from "./api/evaluate";
-import generateHandler from "./api/generate";
+import evaluateHandler from "../api/evaluate";
+import generateHandler from "../api/generate";
 
 async function startServer() {
   const app = express();
