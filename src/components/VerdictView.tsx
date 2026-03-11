@@ -123,6 +123,47 @@ export function VerdictView({
     else onAnalyzeAnother();
   };
 
+  if (isGenerating) {
+    return (
+      <motion.div
+        key="generating"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="flex flex-col items-center justify-center min-h-[480px] text-center px-6"
+      >
+        <div className="flex flex-col items-center gap-6 max-w-sm">
+          <div className="relative">
+            <div className="w-16 h-16 rounded-full border border-zinc-700 flex items-center justify-center">
+              <Loader2 className="w-7 h-7 text-blue-400 animate-spin" />
+            </div>
+            <div className="absolute inset-0 rounded-full border border-blue-500/20 animate-ping" />
+          </div>
+          <div>
+            <p className="text-xs text-zinc-500 uppercase tracking-widest font-semibold mb-4">
+              Crafting Your Assets
+            </p>
+            <AnimatePresence mode="wait">
+              <motion.p
+                key={quipIndex}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.4 }}
+                className="text-zinc-200 text-base font-medium leading-relaxed"
+              >
+                {GENERATION_QUIPS[quipIndex]}
+              </motion.p>
+            </AnimatePresence>
+          </div>
+          <p className="text-xs text-zinc-600 leading-relaxed">
+            Resume, cover letter, and interview playbook typically take 1–2 minutes. Worth the wait.
+          </p>
+        </div>
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div
       key="verdict"
@@ -130,50 +171,8 @@ export function VerdictView({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.35 }}
-      className="space-y-6 relative"
+      className="space-y-6"
     >
-      {/* Generating overlay */}
-      <AnimatePresence>
-        {isGenerating && (
-          <motion.div
-            key="generating-overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[#050505]/90 backdrop-blur-sm rounded-xl min-h-[400px]"
-          >
-            <div className="flex flex-col items-center gap-5 max-w-sm text-center px-6">
-              <div className="relative">
-                <div className="w-14 h-14 rounded-full border border-zinc-700 flex items-center justify-center">
-                  <Loader2 className="w-6 h-6 text-blue-400 animate-spin" />
-                </div>
-                <div className="absolute inset-0 rounded-full border border-blue-500/20 animate-ping" />
-              </div>
-              <div>
-                <p className="text-xs text-zinc-500 uppercase tracking-widest font-semibold mb-3">
-                  Crafting Your Assets
-                </p>
-                <AnimatePresence mode="wait">
-                  <motion.p
-                    key={quipIndex}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
-                    transition={{ duration: 0.4 }}
-                    className="text-zinc-300 text-sm font-medium leading-relaxed"
-                  >
-                    {GENERATION_QUIPS[quipIndex]}
-                  </motion.p>
-                </AnimatePresence>
-              </div>
-              <p className="text-xs text-zinc-600 leading-relaxed">
-                Resume, cover letter, and interview playbook generation typically takes 1–2 minutes. Worth the wait.
-              </p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
