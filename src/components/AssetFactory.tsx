@@ -36,7 +36,7 @@ function extractNodeText(node: ReactNode): string {
   if (typeof node === "number") return String(node);
   if (Array.isArray(node)) return node.map(extractNodeText).join("");
   if (node && typeof node === "object" && "props" in (node as object)) {
-    const el = node as React.ReactElement;
+    const el = node as React.ReactElement<{ children?: ReactNode }>;
     return extractNodeText(el.props.children);
   }
   return "";
@@ -111,22 +111,71 @@ export function AssetFactory({
     inEdit: sandboxEdit.toLowerCase().includes(kw.skill.toLowerCase()),
   }));
 
-  // Protected canvas: custom li renderer for resume
+  // Shared edit chip shown on hover for any editable field
+  const EditChip = () => (
+    <span className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 bg-blue-500/20 border border-blue-500/40 rounded px-1.5 py-0.5 z-10">
+      <PenLine className="w-2.5 h-2.5 text-blue-400" />
+      <span className="text-[9px] text-blue-400 font-semibold uppercase tracking-wide">Edit</span>
+    </span>
+  );
+
+  const editableClass = "group relative cursor-pointer rounded-md px-2 -mx-2 transition-all duration-150 hover:bg-blue-500/10 hover:border-l-2 hover:border-blue-500 hover:pl-3";
+
+  // Protected canvas: custom renderers for all editable resume elements
   const resumeComponents = {
     li: ({ children }: { children?: ReactNode }) => {
       const text = extractNodeText(children);
       return (
-        <li
-          className="group relative cursor-pointer rounded-md px-2 -mx-2 transition-all duration-150 hover:bg-blue-500/10 hover:border-l-2 hover:border-blue-500 hover:pl-3"
-          onClick={() => openSandbox(text)}
-          title="Click to edit this bullet in sandbox"
-        >
-          <span className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 bg-blue-500/20 border border-blue-500/40 rounded px-1.5 py-0.5">
-            <PenLine className="w-2.5 h-2.5 text-blue-400" />
-            <span className="text-[9px] text-blue-400 font-semibold uppercase tracking-wide">Edit</span>
-          </span>
+        <li className={editableClass} onClick={() => openSandbox(text)} title="Click to edit">
+          <EditChip />
           {children}
         </li>
+      );
+    },
+    p: ({ children }: { children?: ReactNode }) => {
+      const text = extractNodeText(children);
+      // Detect job header lines like "Title | Date | Location" and style them distinctly
+      const isJobHeader = text.includes(" | ");
+      if (isJobHeader) {
+        return (
+          <p className={`${editableClass} font-semibold text-zinc-300 mt-4 mb-0.5 border-b border-zinc-700/40 pb-1`} onClick={() => openSandbox(text)} title="Click to edit">
+            <EditChip />
+            {children}
+          </p>
+        );
+      }
+      return (
+        <p className={`${editableClass}`} onClick={() => openSandbox(text)} title="Click to edit">
+          <EditChip />
+          {children}
+        </p>
+      );
+    },
+    h1: ({ children }: { children?: ReactNode }) => {
+      const text = extractNodeText(children);
+      return (
+        <h1 className={`${editableClass} text-2xl font-bold`} onClick={() => openSandbox(text)} title="Click to edit">
+          <EditChip />
+          {children}
+        </h1>
+      );
+    },
+    h2: ({ children }: { children?: ReactNode }) => {
+      const text = extractNodeText(children);
+      return (
+        <h2 className={`${editableClass} text-lg font-bold mt-5`} onClick={() => openSandbox(text)} title="Click to edit">
+          <EditChip />
+          {children}
+        </h2>
+      );
+    },
+    h3: ({ children }: { children?: ReactNode }) => {
+      const text = extractNodeText(children);
+      return (
+        <h3 className={`${editableClass} text-base font-semibold`} onClick={() => openSandbox(text)} title="Click to edit">
+          <EditChip />
+          {children}
+        </h3>
       );
     },
   };
@@ -201,7 +250,7 @@ export function AssetFactory({
               </span>
               <PenLine className="w-3.5 h-3.5 text-blue-400" />
               <p className="text-xs text-blue-300 font-semibold">
-                Click any bullet to edit in sandbox
+                Click any field to edit in sandbox
               </p>
             </div>
             <Button
