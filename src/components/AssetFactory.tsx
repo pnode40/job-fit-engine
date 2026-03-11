@@ -117,12 +117,13 @@ export function AssetFactory({
       const text = extractNodeText(children);
       return (
         <li
-          className="group relative cursor-pointer rounded px-2 -mx-2 transition-colors duration-150 hover:bg-zinc-800/60"
+          className="group relative cursor-pointer rounded-md px-2 -mx-2 transition-all duration-150 hover:bg-blue-500/10 hover:border-l-2 hover:border-blue-500 hover:pl-3"
           onClick={() => openSandbox(text)}
-          title="Click to edit this bullet"
+          title="Click to edit this bullet in sandbox"
         >
-          <span className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-5 opacity-0 group-hover:opacity-100 transition-opacity">
-            <PenLine className="w-2.5 h-2.5 text-zinc-500" />
+          <span className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 bg-blue-500/20 border border-blue-500/40 rounded px-1.5 py-0.5">
+            <PenLine className="w-2.5 h-2.5 text-blue-400" />
+            <span className="text-[9px] text-blue-400 font-semibold uppercase tracking-wide">Edit</span>
           </span>
           {children}
         </li>
@@ -193,9 +194,13 @@ export function AssetFactory({
         {/* Resume — Protected Canvas */}
         <TabsContent value="resume" className="space-y-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <PenLine className="w-3.5 h-3.5 text-zinc-600" />
-              <p className="text-[10px] text-zinc-600 uppercase tracking-widest font-medium">
+            <div className="flex items-center gap-2 bg-blue-500/10 border border-blue-500/25 rounded-full px-3 py-1.5">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+              </span>
+              <PenLine className="w-3.5 h-3.5 text-blue-400" />
+              <p className="text-xs text-blue-300 font-semibold">
                 Click any bullet to edit in sandbox
               </p>
             </div>
