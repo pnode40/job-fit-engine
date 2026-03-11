@@ -166,7 +166,7 @@ export default function App() {
                   Pro
                 </Badge>
               </h1>
-              <p className="text-xs text-zinc-500 mt-0.5 font-medium">Executive Identity Vault</p>
+              <p className="text-xs text-zinc-500 mt-0.5 font-medium">Executive Identity Vault v2</p>
             </div>
           </div>
 
