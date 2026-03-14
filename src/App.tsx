@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import {
   evaluateJobFit,
   generateDocuments,
@@ -16,6 +17,7 @@ import {
   Upload,
   ArrowRight,
   Sparkles,
+  FlaskConical,
 } from "lucide-react";
 import { cn } from "./lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -170,32 +172,46 @@ export default function App() {
             </div>
           </div>
 
-          <div className="flex items-center space-x-2 md:space-x-6 overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
-            {STEPS.map((s, i) => {
-              const maxUnlocked = unlockedStep();
-              const isUnlocked = s.step <= maxUnlocked || s.step === 1;
-              const isActive = activeStep === s.step;
-              return (
-                <div key={s.step} className="flex items-center shrink-0">
-                  <button
-                    onClick={() => isUnlocked && setActiveStep(s.step)}
-                    disabled={!isUnlocked}
-                    className={cn(
-                      "flex items-center space-x-2 transition-all duration-300 px-3 py-2 rounded-lg",
-                      isActive
-                        ? "bg-zinc-800/80 text-white shadow-sm"
-                        : isUnlocked
-                        ? "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40 cursor-pointer"
-                        : "text-zinc-700 cursor-not-allowed"
-                    )}
-                  >
-                    <s.icon className={cn("w-4 h-4", isActive ? "text-blue-400" : "")} />
-                    <span className="text-sm font-medium tracking-wide">{s.label}</span>
-                  </button>
-                  {i < 3 && <div className="w-4 md:w-8 h-px mx-1 md:mx-2 bg-zinc-800" />}
-                </div>
-              );
-            })}
+          <div className="flex items-center gap-3 md:gap-0">
+            {/* Nav stepper */}
+            <div className="flex items-center space-x-2 md:space-x-6 overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
+              {STEPS.map((s, i) => {
+                const maxUnlocked = unlockedStep();
+                const isUnlocked = s.step <= maxUnlocked || s.step === 1;
+                const isActive = activeStep === s.step;
+                return (
+                  <div key={s.step} className="flex items-center shrink-0">
+                    <button
+                      onClick={() => isUnlocked && setActiveStep(s.step)}
+                      disabled={!isUnlocked}
+                      className={cn(
+                        "flex items-center space-x-2 transition-all duration-300 px-3 py-2 rounded-lg",
+                        isActive
+                          ? "bg-zinc-800/80 text-white shadow-sm"
+                          : isUnlocked
+                          ? "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40 cursor-pointer"
+                          : "text-zinc-700 cursor-not-allowed"
+                      )}
+                    >
+                      <s.icon className={cn("w-4 h-4", isActive ? "text-blue-400" : "")} />
+                      <span className="text-sm font-medium tracking-wide">{s.label}</span>
+                    </button>
+                    {i < 3 && <div className="w-4 md:w-8 h-px mx-1 md:mx-2 bg-zinc-800" />}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Eval link */}
+            <div className="ml-4 pl-4 border-l border-zinc-800 shrink-0 hidden sm:block">
+              <Link
+                to="/eval"
+                className="flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 transition-colors px-2 py-1.5 rounded-lg hover:bg-zinc-800/40"
+              >
+                <FlaskConical className="w-3.5 h-3.5" />
+                Eval
+              </Link>
+            </div>
           </div>
         </div>
       </header>
@@ -231,6 +247,20 @@ export default function App() {
                     value={dossierContent}
                     onChange={(e) => handleSaveDossier(e.target.value)}
                   />
+
+                  {/* Character count quality indicator */}
+                  <p className="text-xs text-zinc-500">
+                    {dossierContent.length === 0 ? null
+                      : dossierContent.length < 300
+                      ? <span>🔴 Add more detail for better results</span>
+                      : dossierContent.length < 801
+                      ? <span className="text-yellow-500">🟡 Basic — consider expanding your experience</span>
+                      : dossierContent.length < 2001
+                      ? <span className="text-emerald-500">🟢 Good — engine has enough to work with</span>
+                      : <span className="text-emerald-400">✅ Detailed — optimal input for personalized recommendations</span>
+                    }
+                  </p>
+
                   <div className="flex flex-col sm:flex-row gap-3 pt-2">
                     <input
                       type="file"
@@ -320,6 +350,7 @@ export default function App() {
             {/* Phase 1: Ingestion view (evaluation loading) */}
             {activeStep === 2 && isEvaluating && (
               <IngestionView
+                key="ingestion-eval"
                 dossierContent={dossierContent}
                 jobDescription={jobDescription}
               />
@@ -328,6 +359,7 @@ export default function App() {
             {/* Asset generation loading */}
             {activeStep === 3 && isGenerating && (
               <IngestionView
+                key="ingestion-gen"
                 dossierContent={dossierContent}
                 jobDescription={jobDescription}
                 phases={GENERATION_PHASES}

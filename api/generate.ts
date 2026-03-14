@@ -87,15 +87,13 @@ You MUST follow this exact Markdown structure for the entire resume to ensure th
 
 ## PROFESSIONAL EXPERIENCE
 
-### [Company Name]
-*[Job Title] | [Dates of Employment] | [Location]*
-[1-2 sentence overview of the role scope and mandate]
+**[Company Name]** | *[Job Title] | [Dates of Employment] | [Location]*
+* [Bullet point: role scope, mandate, and scale]
 * [Bullet point proving scale/impact]
 * [Bullet point proving scale/impact]
 
-### [Company Name 2]
-*[Job Title 2] | [Dates of Employment] | [Location]*
-... (continue for all roles)
+**[Company Name 2]** | *[Job Title 2] | [Dates of Employment] | [Location]*
+... (continue for all roles, always bullets only — never a prose paragraph after the header line)
 
 ## EDUCATION & CERTIFICATIONS
 ... (list education)

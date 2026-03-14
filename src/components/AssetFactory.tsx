@@ -61,6 +61,23 @@ export function AssetFactory({
 }: AssetFactoryProps) {
   const [localResume, setLocalResume] = useState(documents.resumeMarkdown);
 
+  // Insert blank lines after italic job header lines like *Title | Date | Location*
+  // so they render as separate paragraphs and don't merge with the description text.
+  // Targets only italic-wrapped lines (not contact info which also contains " | ").
+  const processedResume = (() => {
+    const lines = localResume.split('\n');
+    const out: string[] = [];
+    for (let i = 0; i < lines.length; i++) {
+      out.push(lines[i]);
+      const trimmed = lines[i].trim();
+      const isItalicJobHeader = /^\*[^*]+\|[^*]+\*$/.test(trimmed);
+      if (isItalicJobHeader && i + 1 < lines.length && lines[i + 1].trim() !== '') {
+        out.push('');
+      }
+    }
+    return out.join('\n');
+  })();
+
   // Sandbox modal state
   const [sandboxOpen, setSandboxOpen] = useState(false);
   const [sandboxOriginal, setSandboxOriginal] = useState("");
@@ -263,7 +280,7 @@ export function AssetFactory({
             </Button>
           </div>
           <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-2xl p-8 md:p-12 prose prose-invert max-w-none prose-sm shadow-xl [&_li]:list-disc">
-            <Markdown components={resumeComponents as object}>{localResume}</Markdown>
+            <Markdown components={resumeComponents as object}>{processedResume}</Markdown>
           </div>
         </TabsContent>
 
