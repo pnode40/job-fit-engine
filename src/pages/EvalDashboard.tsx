@@ -37,7 +37,7 @@ interface EngineOutput {
   skillsScore: number;
   seniorityScore: number;
   domainScore: number;
-  recommendation: "APPLY" | "DO_NOT_APPLY";
+  recommendation: "STRONG_FIT" | "GOOD_FIT" | "PARTIAL_FIT" | "WEAK_FIT" | "DO_NOT_APPLY";
   recommendationReasoning: string;
   goodFitReasons: string[];
   badFitReasons: string[];
@@ -240,25 +240,29 @@ SELF-DIRECTED AI LEARNING (2023–2024)
 
 EDUCATION
 BS Business – Arizona State University (2015)`,
-    jobDescription: `AI Enablement Manager – Enterprise Sales
+    jobDescription: `AI Enablement Specialist – Revenue Enablement Team
 
-We're hiring an AI Enablement Manager to accelerate AI adoption across our enterprise sales organization.
+Cloudpath (Series B, 280-person B2B SaaS) is building out our Revenue Enablement function and looking for an AI Enablement Specialist to accelerate AI adoption across our 120-person sales org.
+
+About the Role:
+This is an execution-focused, high-impact role. You'll build the tooling, content, and training programs that help our reps sell smarter using AI. We're open to candidates coming from a quota-carrying sales background who are making a deliberate move into enablement — we actually prefer it. You know the job our reps do. We can teach you the enablement craft.
 
 Responsibilities:
-• Design and deliver AI training programs for 200+ sales reps globally
-• Build prompt libraries, playbooks, and toolkits for AI-assisted selling
-• Partner with sales leaders to identify AI use cases and ROI metrics
-• Evaluate and onboard new AI tools; manage vendor relationships
+• Build and maintain a prompt library and AI playbook for sales reps (prospecting, discovery, follow-up, objection handling)
+• Design and deliver onboarding and ongoing training on AI tools (Copilot, ChatGPT, Gong, Lavender, etc.)
+• Partner with AEs and managers to identify friction points where AI can reduce manual work
+• Track adoption metrics and report on time-saved and pipeline impact
 
 Requirements:
-• 5+ years of experience in sales enablement, L&D, or sales operations
-• Hands-on experience with AI tools (ChatGPT, Copilot, or equivalent)
-• Strong communication and facilitation skills
-• Understanding of enterprise sales processes
+• 2+ years of experience in B2B sales, sales ops, or revenue enablement
+• Hands-on familiarity with AI productivity tools (you use them yourself, not just aware of them)
+• Strong written communication — you can simplify complex ideas for a non-technical audience
+• Demonstrated ability to build or facilitate training, even informally
 
-Preferred:
-• Background in sales with quota-carrying experience
-• Experience building internal training programs or enablement content`,
+Preferred (not required):
+• Experience building internal playbooks, Notion wikis, or enablement content
+• Background as a quota-carrying AE or SDR is a genuine plus
+• Familiarity with Salesforce, Gong, or similar revenue tech`,
   },
 ];
 
@@ -679,11 +683,13 @@ export function EvalDashboard() {
                                       <div className="pt-1">
                                         <span className={cn(
                                           "text-xs font-bold px-2.5 py-1 rounded-full",
-                                          result.engineOutput.recommendation === "APPLY"
+                                          result.engineOutput.recommendation === "STRONG_FIT" || result.engineOutput.recommendation === "GOOD_FIT"
                                             ? "bg-emerald-500/15 text-emerald-400"
+                                            : result.engineOutput.recommendation === "PARTIAL_FIT"
+                                            ? "bg-amber-500/15 text-amber-400"
                                             : "bg-red-500/15 text-red-400"
                                         )}>
-                                          {result.engineOutput.recommendation}
+                                          {result.engineOutput.recommendation.replace("_", " ")}
                                         </span>
                                       </div>
                                     </div>

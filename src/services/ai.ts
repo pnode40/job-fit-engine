@@ -6,7 +6,7 @@ export interface JobFitEvaluation {
   domainScore: number;
   goodFitReasons: string[];
   badFitReasons: string[];
-  recommendation: "APPLY" | "DO_NOT_APPLY";
+  recommendation: "STRONG_FIT" | "GOOD_FIT" | "PARTIAL_FIT" | "WEAK_FIT" | "DO_NOT_APPLY";
   recommendationReasoning: string;
   keywords: { skill: string; matched: boolean }[];
 }

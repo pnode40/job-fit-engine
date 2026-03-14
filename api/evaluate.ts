@@ -59,15 +59,23 @@ I will provide you with a candidate's Master Dossier (their verified skills, exp
 Your task is to evaluate the exact fit between the candidate and the job.
 
 CRITICAL RULES:
-1. ZERO HALLUCINATION: You are strictly forbidden from assuming, inventing, or hallucinating experience. If a requirement in the Job Description is not explicitly mentioned or clearly demonstrated in the Dossier, you MUST mark it as a 'gap' (badFitReason).
-2. IMPLICIT TRANSLATION: You may translate explicit achievements into required skills if the connection is undeniable (e.g., managing a $5M P&L implies Financial Acumen), but you must explicitly state the source of your translation in your reasoning.
+1. ZERO HALLUCINATION: You are strictly forbidden from assuming, inventing, or hallucinating experience. If a requirement in the Job Description is not explicitly mentioned or clearly demonstrated in the Dossier, you MUST mark it as a 'gap' (badFitReason). Recognizing that a candidate's demonstrated experience in an adjacent field is relevant to a requirement is NOT hallucination — it is informed assessment. Hallucination is inventing experience that does not exist in the dossier at all.
+2. IMPLICIT TRANSLATION: You may translate explicit achievements into required skills if the connection is undeniable (full credit) or reasonably defensible (partial credit). For full credit, the connection must be undeniable (e.g., managing a $5M P&L implies Financial Acumen). For partial credit, the standard is: would a reasonable hiring manager accept this experience as relevant? You must explicitly state the source of your translation and whether you are granting full or partial credit.
 3. CLAIM + PROOF STRUCTURE: Every single 'goodFitReason' must follow a Claim + Proof structure. For example: "Candidate meets the [Skill] requirement, proven by their experience [Exact Metric/Achievement from Dossier]." Do not write generic praise.
-4. BE RUTHLESS: This is a pro-grade platform. If the candidate is a weak fit, say so clearly. Do not inflate the match score.
-5. CALIBRATE FOR SENIORITY & SCALE: You must aggressively evaluate the career level, scope of responsibility, and implicit compensation band of the Job Description against the candidate's actual track record. Keyword matches do not equal level matches. If the scale of the role (e.g. Director/VP $250K+) far exceeds the candidate's demonstrated scope, penalize the match score heavily and explain why.
+4. BE CALIBRATED, NOT JUST RUTHLESS: This is a pro-grade platform. If the candidate is a weak fit, say so clearly. Do not inflate the match score. But do not deflate it either. A candidate who meets 60-70% of requirements with strong transferable skills is a PARTIAL_FIT, not a DO_NOT_APPLY. Reserve DO_NOT_APPLY only for candidates who are fundamentally misaligned — where applying would be a waste of time for both sides.
+5. CALIBRATE FOR SENIORITY & SCALE: You must aggressively evaluate the career level, scope of responsibility, and implicit compensation band of the Job Description against the candidate's actual track record. Keyword matches do not equal level matches. If the scale of the role (e.g. Director/VP $250K+) far exceeds the candidate's demonstrated scope, penalize the match score proportionally to the gap in scope and responsibility and explain why.
 6. DIMENSIONAL SCORING: In addition to the holistic matchScore, provide three separate dimensional scores (0-100 each):
    - skillsScore: How well the candidate's hard skills, tools, and methodologies match the JD's explicit technical requirements.
    - seniorityScore: How well the candidate's demonstrated career level, scope of responsibility, and organizational scale matches the target role's expectations.
    - domainScore: How well the candidate's industry vertical, functional expertise, and domain knowledge aligns with the target role's context. The holistic matchScore must be consistent with the weighted average of these three scores.
+7. TRANSFERABLE SKILLS & ADJACENT EXPERIENCE: When a candidate lacks a specific requirement but has demonstrably adjacent experience, evaluate whether that experience reasonably bridges the gap. For example: K-12 curriculum design is relevant (not equivalent) to corporate instructional design. Quota-carrying B2B sales is relevant (not equivalent) to sales enablement. Score adjacent experience as partial credit — above zero but below what direct experience would receive. The exact score should reflect how strong the transfer logic is for the specific case. However, if the candidate's entire background is in an unrelated field with no demonstrable connection to the target role's core function, this logic does not apply — score based on actual evidence only.
+8. RECOMMENDATION TIERS: Use these tiers for the recommendation field based on the holistic matchScore:
+   - STRONG_FIT (matchScore 75+): Candidate meets most requirements with only minor gaps.
+   - GOOD_FIT (matchScore 60-74): Candidate is competitive with some notable gaps that can be addressed.
+   - PARTIAL_FIT (matchScore 40-59): Candidate has a relevant foundation but significant gaps — worth applying with strong positioning.
+   - WEAK_FIT (matchScore 20-39): Candidate has tangential relevance but is not competitive for this role.
+   - DO_NOT_APPLY (matchScore below 20): Fundamental misalignment in skills, domain, and seniority — applying would waste everyone's time.
+   The recommendation must be consistent with the matchScore. Do not output DO_NOT_APPLY for a candidate scoring above 40.
 
 Candidate Dossier:
 ${dossier}
@@ -117,7 +125,7 @@ ${jobDescription}
             },
             recommendation: {
               type: Type.STRING,
-              description: "Whether the candidate should apply or not. Must be exactly 'APPLY' or 'DO_NOT_APPLY'.",
+              description: "Fit tier for the candidate. Must be exactly one of: 'STRONG_FIT', 'GOOD_FIT', 'PARTIAL_FIT', 'WEAK_FIT', 'DO_NOT_APPLY'.",
             },
             recommendationReasoning: {
               type: Type.STRING,
@@ -157,7 +165,8 @@ ${jobDescription}
     if (!Array.isArray(evaluation.goodFitReasons) || !Array.isArray(evaluation.badFitReasons) || !Array.isArray(evaluation.keywords)) {
       throw new Error("Invalid evaluation response: missing required arrays");
     }
-    if (evaluation.recommendation !== 'APPLY' && evaluation.recommendation !== 'DO_NOT_APPLY') {
+    const validRecommendations = ['STRONG_FIT', 'GOOD_FIT', 'PARTIAL_FIT', 'WEAK_FIT', 'DO_NOT_APPLY'];
+    if (!validRecommendations.includes(evaluation.recommendation)) {
       throw new Error("Invalid evaluation response: unexpected recommendation value");
     }
 
