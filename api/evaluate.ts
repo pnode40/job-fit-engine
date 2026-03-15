@@ -154,9 +154,17 @@ ${jobDescription}
     }
 
     // Compute matchScore and recommendation server-side
-    const matchScore = Math.round(
+    let matchScore = Math.round(
       (evaluation.skillsScore * 0.4) + (evaluation.seniorityScore * 0.3) + (evaluation.domainScore * 0.3)
     );
+
+    // Must-have penalty: if any gap mentions a "must have" requirement, apply a 20% haircut
+    const hasMustHaveGap = (evaluation.badFitReasons as string[]).some(
+      (reason) => /must[\s-]have/i.test(reason)
+    );
+    if (hasMustHaveGap) {
+      matchScore = Math.round(matchScore * 0.8);
+    }
 
     let recommendation: string;
     if (matchScore >= 80) recommendation = "STRONG_FIT";
