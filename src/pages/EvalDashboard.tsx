@@ -258,6 +258,8 @@ Requirements:
 • Hands-on familiarity with AI productivity tools (you use them yourself, not just aware of them)
 • Strong written communication — you can simplify complex ideas for a non-technical audience
 • Demonstrated ability to build or facilitate training, even informally
+• Must have prior experience managing or administering an LMS platform (Seismic, Highspot, or similar)
+• 2+ years experience reporting on enablement program impact using CRM data (Salesforce required)
 
 Preferred (not required):
 • Experience building internal playbooks, Notion wikis, or enablement content
