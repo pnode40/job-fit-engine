@@ -70,6 +70,7 @@ CRITICAL RULES:
    - skillsScore: How well the candidate's hard skills, tools, and methodologies match the JD's explicit technical requirements.
    - seniorityScore: How well the candidate's demonstrated career level, scope of responsibility, and organizational scale matches the target role's expectations.
    - domainScore: How well the candidate's industry vertical, functional expertise, and domain knowledge aligns with the target role's context.
+8. MUST-HAVE GAP COUNT: Count the number of requirements in the JD that are explicitly stated as mandatory, required, or must-have that the candidate does NOT meet. Return this as mustHaveGapCount.
 7. TRANSFERABLE SKILLS & ADJACENT EXPERIENCE: When a candidate lacks a specific requirement but has demonstrably adjacent experience, evaluate whether that experience reasonably bridges the gap. For example: K-12 curriculum design is relevant (not equivalent) to corporate instructional design. Quota-carrying B2B sales is relevant (not equivalent) to sales enablement. Score adjacent experience as partial credit — above zero but below what direct experience would receive. The exact score should reflect how strong the transfer logic is for the specific case. However, if the candidate's entire background is in an unrelated field with no demonstrable connection to the target role's core function, this logic does not apply — score based on actual evidence only. Important: Even when a JD explicitly welcomes career pivots or prefers adjacent backgrounds, a candidate making their first move into a new functional role — with no prior job title, formal program, or measurable output in that function — should receive dimensional scores that reflect the actual gap, not the JD's hiring intent. A JD that says it 'prefers' or 'welcomes' pivot candidates is describing hiring intent, not a waiver of the experience gap. Adjacent experience reduces the gap; it does not eliminate it.
 
 Candidate Dossier:
@@ -129,9 +130,13 @@ ${jobDescription}
                 },
                 required: ["skill", "matched"]
               }
+            },
+            mustHaveGapCount: {
+              type: Type.INTEGER,
+              description: "The number of requirements in the JD that are explicitly stated as mandatory, required, or must-have that the candidate does NOT meet.",
             }
           },
-          required: ["levelingAnalysis", "skillsScore", "seniorityScore", "domainScore", "goodFitReasons", "badFitReasons", "recommendationReasoning", "keywords"],
+          required: ["levelingAnalysis", "skillsScore", "seniorityScore", "domainScore", "goodFitReasons", "badFitReasons", "recommendationReasoning", "keywords", "mustHaveGapCount"],
         },
       },
     });
@@ -158,12 +163,11 @@ ${jobDescription}
       (evaluation.skillsScore * 0.4) + (evaluation.seniorityScore * 0.3) + (evaluation.domainScore * 0.3)
     );
 
-    // Must-have penalty: if any gap mentions a "must have" requirement, apply a 20% haircut
-    const hasMustHaveGap = (evaluation.badFitReasons as string[]).some(
-      (reason) => /must[\s-]have/i.test(reason)
-    );
-    if (hasMustHaveGap) {
-      matchScore = Math.round(matchScore * 0.8);
+    // Must-have penalty: 10% per unmet must-have requirement, capped at 40%
+    const mustHaveGapCount = evaluation.mustHaveGapCount ?? 0;
+    if (mustHaveGapCount > 0) {
+      const penalty = Math.min(mustHaveGapCount * 0.1, 0.4);
+      matchScore = Math.round(matchScore * (1 - penalty));
     }
 
     let recommendation: string;
