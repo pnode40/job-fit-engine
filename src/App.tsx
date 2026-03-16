@@ -22,6 +22,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { IngestionView, GENERATION_PHASES } from "./components/IngestionView";
 import { VerdictView } from "./components/VerdictView";
 import { AssetFactory } from "./components/AssetFactory";
+import * as pdfjsLib from "pdfjs-dist";
+import * as mammoth from "mammoth";
+
+// Configure PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 function getTier(score: number): 1 | 2 | 3 | 4 {
   if (score >= 90) return 1;
@@ -71,15 +76,46 @@ export default function App() {
     localStorage.setItem("job-fit-master-dossier", content);
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const text = event.target?.result as string;
+
+    try {
+      let text = "";
+      const fileName = file.name.toLowerCase();
+
+      if (fileName.endsWith(".pdf")) {
+        // Extract text from PDF
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        const textContent: string[] = [];
+
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+          const page = await pdf.getPage(pageNum);
+          const content = await page.getTextContent();
+          const pageText = content.items
+            .map((item: any) => item.str)
+            .join(" ");
+          textContent.push(pageText);
+        }
+
+        text = textContent.join("\n");
+      } else if (fileName.endsWith(".docx")) {
+        // Extract text from Word document
+        const arrayBuffer = await file.arrayBuffer();
+        const result = await mammoth.extractRawText({ arrayBuffer });
+        text = result.value;
+      } else {
+        // Plain text files (.txt, .md, .csv)
+        text = await file.text();
+      }
+
       handleSaveDossier(dossierContent ? `${dossierContent}\n\n${text}` : text);
-    };
-    reader.readAsText(file);
+    } catch (error) {
+      console.error("File upload error:", error);
+      alert(`Failed to process file: ${error instanceof Error ? error.message : "Unknown error"}`);
+    }
+
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -252,7 +288,7 @@ export default function App() {
                   <div className="flex flex-col sm:flex-row gap-3 pt-2">
                     <input
                       type="file"
-                      accept=".txt,.md,.csv"
+                      accept=".txt,.md,.csv,.pdf,.docx"
                       className="hidden"
                       ref={fileInputRef}
                       onChange={handleFileUpload}
