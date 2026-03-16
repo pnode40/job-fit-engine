@@ -160,20 +160,22 @@ B.S. Biology – University of Oregon (2015)
 
 TECHNICAL SKILLS
 Google Workspace, Articulate Storyline (basic), Nearpod, Canvas LMS, Canva`,
-    jobDescription: `Instructional Designer – Corporate Learning & Development
+    jobDescription: `Instructional Designer (Entry-Level) – TechBridge Learning & Development
 
-We seek an Instructional Designer to create engaging e-learning content and training programs for a global enterprise workforce.
+TechBridge (1,800-person mid-size SaaS company) is looking for a curious, organized Instructional Designer to join our growing L&D team. We're building out our employee onboarding and skills training library and need someone who can design clear, engaging learning experiences.
+
+We're explicitly open to candidates transitioning from K-12 education — if you've designed curriculum and facilitated learning, you already know how to do the core of this job.
 
 Requirements:
-• 3+ years of experience in instructional design or L&D in a corporate setting
-• Proficiency with Articulate Storyline or Rise 360
-• Experience applying ADDIE or SAM instructional design models
-• Strong writing and content development skills
-• Familiarity with LMS platforms (Workday Learning, Cornerstone, or similar)
+• 1+ year of experience designing or facilitating instructional or training content (K-12 teaching, tutoring, corporate training, or workshop facilitation all count)
+• Strong writing and content development skills — you can turn complex ideas into clear, learner-friendly material
+• Comfort learning new software tools; familiarity with any LMS (Canvas, Google Classroom, or similar) is fine
+• Organized self-starter who can manage multiple projects simultaneously
 
-Preferred:
-• Adult learning background (corporate vs. K-12)
-• Video production experience for learning content`,
+Preferred (not required):
+• Articulate Storyline or Rise 360 experience is a genuine plus, but we'll train the right person
+• Familiarity with corporate adult learning principles
+• Experience creating video or multimedia learning content`,
   },
   {
     id: "4",

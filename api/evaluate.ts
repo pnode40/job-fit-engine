@@ -163,10 +163,10 @@ ${jobDescription}
       (evaluation.skillsScore * 0.4) + (evaluation.seniorityScore * 0.3) + (evaluation.domainScore * 0.3)
     );
 
-    // Must-have penalty: 10% per unmet must-have requirement, capped at 40%
+    // Must-have penalty: 15% per unmet must-have requirement, capped at 40%
     const mustHaveGapCount = evaluation.mustHaveGapCount ?? 0;
     if (mustHaveGapCount > 0) {
-      const penalty = Math.min(mustHaveGapCount * 0.1, 0.4);
+      const penalty = Math.min(mustHaveGapCount * 0.15, 0.4);
       matchScore = Math.round(matchScore * (1 - penalty));
     }
 
