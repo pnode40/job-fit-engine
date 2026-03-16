@@ -260,39 +260,110 @@ export default function App() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
                 transition={{ duration: 0.3 }}
-                className="space-y-8"
+                className="space-y-7"
               >
-                <div>
-                  <h2 className="text-3xl font-extrabold text-white tracking-tight">
-                    Build Your Master Dossier
-                  </h2>
-                  <p className="text-zinc-400 mt-2 text-lg">
-                    Load your entire professional history, metrics, and achievements. The AI engine will filter and format this data for every new application.
-                  </p>
+                {/* Header */}
+                <div className="space-y-4">
+                  <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.05 }}
+                    className="inline-flex items-center gap-2 px-3 py-1 bg-blue-500/10 border border-blue-500/20 rounded-full"
+                  >
+                    <Shield className="w-3 h-3 text-blue-400" />
+                    <span className="text-[11px] font-semibold tracking-widest text-blue-400 uppercase">Intelligence Vault — Step 1 of 4</span>
+                  </motion.div>
+
+                  <motion.h2
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-[1.15]"
+                  >
+                    The more context you give it,<br />
+                    <span className="text-zinc-500">the sharper every application becomes.</span>
+                  </motion.h2>
+
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.15 }}
+                    className="text-zinc-400 text-base max-w-2xl leading-relaxed"
+                  >
+                    This is your master career file — paste everything here once. The engine reads your full history and pulls only what's relevant when you target a specific job. The richer this gets, the more precisely it can match and position you.
+                  </motion.p>
                 </div>
 
-                <div className="bg-zinc-900/40 border border-zinc-800/50 rounded-2xl p-6 shadow-2xl backdrop-blur-sm space-y-4">
+                {/* What to include chips */}
+                <motion.div
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="space-y-2"
+                >
+                  <p className="text-[11px] font-semibold tracking-widest text-zinc-600 uppercase">What to include</p>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      "Resume or CV",
+                      "LinkedIn summary & work history",
+                      "Key metrics & numbers",
+                      "Performance review highlights",
+                      "Projects & case studies",
+                      "Brag doc / wins list",
+                      "Certifications & credentials",
+                    ].map((item) => (
+                      <span
+                        key={item}
+                        className="px-3 py-1.5 bg-zinc-900/80 border border-zinc-800 rounded-lg text-xs text-zinc-400 font-medium"
+                      >
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                </motion.div>
+
+                {/* Textarea card */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.25 }}
+                  className="bg-zinc-900/40 border border-zinc-800/50 rounded-2xl p-6 shadow-2xl backdrop-blur-sm space-y-4"
+                >
                   <Textarea
-                    placeholder="Paste your comprehensive work experience (resumes, performance reviews, brag documents)..."
-                    className="min-h-[400px] bg-zinc-950/50 border-zinc-800 text-zinc-300 font-mono text-sm resize-y focus-visible:ring-1 focus-visible:ring-blue-500/50 placeholder:text-zinc-700 rounded-xl p-6 leading-relaxed"
+                    placeholder={`Paste everything here — format doesn't matter, the engine will parse it.\n\nGood inputs:\n  • Resume (paste text or upload PDF/Word below)\n  • "Led a team of 8 engineers, shipped 3 major features per quarter"\n  • "Grew ARR from $2M to $5M over 18 months"\n  • LinkedIn About section + job descriptions\n  • Performance review excerpts\n  • Side projects, open source, certifications\n\nMore depth = more precise targeting. Don't edit or clean it up — raw is fine.`}
+                    className="min-h-[360px] bg-zinc-950/50 border-zinc-800 text-zinc-300 font-mono text-sm resize-y focus-visible:ring-1 focus-visible:ring-blue-500/50 placeholder:text-zinc-600 rounded-xl p-6 leading-relaxed"
                     value={dossierContent}
                     onChange={(e) => handleSaveDossier(e.target.value)}
                   />
 
-                  {/* Character count quality indicator */}
-                  <p className="text-xs text-zinc-500">
-                    {dossierContent.length === 0 ? null
-                      : dossierContent.length < 300
-                      ? <span>🔴 Add more detail for better results</span>
-                      : dossierContent.length < 801
-                      ? <span className="text-yellow-500">🟡 Basic — consider expanding your experience</span>
-                      : dossierContent.length < 2001
-                      ? <span className="text-emerald-500">🟢 Good — engine has enough to work with</span>
-                      : <span className="text-emerald-400">✅ Detailed — optimal input for personalized recommendations</span>
-                    }
-                  </p>
+                  {/* Signal strength indicator */}
+                  {dossierContent.length > 0 && (() => {
+                    const len = dossierContent.length;
+                    const pct = Math.min(len / 2000, 1);
+                    const { label, color, barColor } =
+                      len < 300
+                        ? { label: "Minimal signal — add more to improve accuracy", color: "text-red-400", barColor: "bg-red-500" }
+                        : len < 801
+                        ? { label: "Basic coverage — consider expanding your history", color: "text-yellow-400", barColor: "bg-yellow-500" }
+                        : len < 2001
+                        ? { label: "Strong profile — engine has enough to work with", color: "text-emerald-400", barColor: "bg-emerald-500" }
+                        : { label: "Deep intelligence — optimal for precision targeting", color: "text-blue-400", barColor: "bg-blue-500" };
+                    return (
+                      <div className="space-y-1.5">
+                        <div className="h-1 w-full bg-zinc-800 rounded-full overflow-hidden">
+                          <motion.div
+                            className={`h-full rounded-full ${barColor}`}
+                            initial={{ width: 0 }}
+                            animate={{ width: `${pct * 100}%` }}
+                            transition={{ duration: 0.4, ease: "easeOut" }}
+                          />
+                        </div>
+                        <p className={`text-[11px] font-medium ${color}`}>{label}</p>
+                      </div>
+                    );
+                  })()}
 
-                  <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                  <div className="flex flex-col sm:flex-row gap-3 pt-1">
                     <input
                       type="file"
                       accept=".txt,.md,.csv,.pdf,.docx"
@@ -305,7 +376,7 @@ export default function App() {
                       onClick={() => fileInputRef.current?.click()}
                       className="bg-zinc-900 border-zinc-800 hover:bg-zinc-800 text-zinc-300"
                     >
-                      <Upload className="w-4 h-4 mr-2" /> Upload File
+                      <Upload className="w-4 h-4 mr-2" /> Upload PDF or Word Doc
                     </Button>
                     <div className="flex-1" />
                     <Button
@@ -314,10 +385,10 @@ export default function App() {
                       disabled={dossierContent.trim().length < 50}
                       className="bg-white text-black hover:bg-zinc-200 font-bold px-8 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
                     >
-                      Next: Target Role <ArrowRight className="ml-2 w-4 h-4" />
+                      Analyze a Job <ArrowRight className="ml-2 w-4 h-4" />
                     </Button>
                   </div>
-                </div>
+                </motion.div>
               </motion.div>
             )}
 
