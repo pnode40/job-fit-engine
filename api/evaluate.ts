@@ -8,6 +8,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     process.env.APP_URL,
     'http://localhost:3000',
     'http://localhost:5173',
+    'https://job-fit-engine-six-steel.vercel.app',
+    'https://job-fit-engine-six.vercel.app',
+    'https://job-fit-engine-six-eric-patnoudes-s-projects.vercel.app',
   ].filter(Boolean) as string[];
 
   const origin = req.headers.origin as string | undefined;
