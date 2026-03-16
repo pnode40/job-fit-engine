@@ -25,8 +25,11 @@ import { AssetFactory } from "./components/AssetFactory";
 import * as pdfjsLib from "pdfjs-dist";
 import * as mammoth from "mammoth";
 
-// Configure PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+// Configure PDF.js worker using local bundled file (v5 is .mjs only)
+pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+  "pdfjs-dist/build/pdf.worker.min.mjs",
+  import.meta.url
+).href;
 
 function getTier(score: number): 1 | 2 | 3 | 4 {
   if (score >= 90) return 1;
@@ -85,21 +88,25 @@ export default function App() {
       const fileName = file.name.toLowerCase();
 
       if (fileName.endsWith(".pdf")) {
-        // Extract text from PDF
+        // Extract text from PDF preserving line structure
         const arrayBuffer = await file.arrayBuffer();
         const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-        const textContent: string[] = [];
+        const pageTexts: string[] = [];
 
         for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
           const page = await pdf.getPage(pageNum);
           const content = await page.getTextContent();
-          const pageText = content.items
-            .map((item: any) => item.str)
-            .join(" ");
-          textContent.push(pageText);
+          // Use hasEOL flag to preserve line breaks rather than joining everything with spaces
+          let pageText = "";
+          for (const item of content.items as any[]) {
+            pageText += item.str;
+            if (item.hasEOL) pageText += "\n";
+            else if (item.str && !item.str.endsWith(" ")) pageText += " ";
+          }
+          pageTexts.push(pageText.trim());
         }
 
-        text = textContent.join("\n");
+        text = pageTexts.join("\n\n");
       } else if (fileName.endsWith(".docx")) {
         // Extract text from Word document
         const arrayBuffer = await file.arrayBuffer();
