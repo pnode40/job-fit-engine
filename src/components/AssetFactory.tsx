@@ -323,7 +323,7 @@ export function AssetFactory({
                 "text-xs h-7 transition-colors",
                 isCoverEditing
                   ? "bg-blue-600/20 border-blue-500/40 text-blue-300 hover:bg-blue-600/30"
-                  : "bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-white"
+                  : "bg-blue-500/10 border-blue-500/25 text-blue-300 hover:bg-blue-500/20"
               )}
             >
               {isCoverEditing
