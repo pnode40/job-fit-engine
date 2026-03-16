@@ -169,7 +169,8 @@ We're explicitly open to candidates transitioning from K-12 education — if you
 Requirements:
 • 1+ year of experience designing or facilitating instructional or training content (K-12 teaching, tutoring, corporate training, or workshop facilitation all count)
 • Strong writing and content development skills — you can turn complex ideas into clear, learner-friendly material
-• Comfort learning new software tools; familiarity with any LMS (Canvas, Google Classroom, or similar) is fine
+• Must have experience building SCORM or xAPI-compliant content packages for LMS delivery
+• Required: experience with a corporate LMS (Cornerstone OnDemand, Workday Learning, or similar) — Canvas and Google Classroom do not qualify for this requirement
 • Organized self-starter who can manage multiple projects simultaneously
 
 Preferred (not required):
