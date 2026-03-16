@@ -395,6 +395,9 @@ export default function App() {
                 onUpdateResume={(newMarkdown) =>
                   setDocuments((prev) => prev ? { ...prev, resumeMarkdown: newMarkdown } : prev)
                 }
+                onUpdateCoverLetter={(newMarkdown) =>
+                  setDocuments((prev) => prev ? { ...prev, coverLetterMarkdown: newMarkdown } : prev)
+                }
                 onNewApplication={handleNewApplication}
               />
             )}
