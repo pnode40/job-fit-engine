@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
 import {
   evaluateJobFit,
   generateDocuments,
@@ -17,7 +16,6 @@ import {
   Upload,
   ArrowRight,
   Sparkles,
-  FlaskConical,
 } from "lucide-react";
 import { cn } from "./lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -202,16 +200,6 @@ export default function App() {
               })}
             </div>
 
-            {/* Eval link */}
-            <div className="ml-4 pl-4 border-l border-zinc-800 shrink-0 hidden sm:block">
-              <Link
-                to="/eval"
-                className="flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 transition-colors px-2 py-1.5 rounded-lg hover:bg-zinc-800/40"
-              >
-                <FlaskConical className="w-3.5 h-3.5" />
-                Eval
-              </Link>
-            </div>
           </div>
         </div>
       </header>
