@@ -34,6 +34,9 @@ interface JudgeOutput {
 
 interface EngineOutput {
   matchScore: number;
+  baseComposite: number;
+  penaltyPoints: number;
+  mustHaveGapCount: number;
   skillsScore: number;
   seniorityScore: number;
   domainScore: number;
@@ -169,8 +172,8 @@ We're explicitly open to candidates transitioning from K-12 education — if you
 Requirements:
 • 1+ year of experience designing or facilitating instructional or training content (K-12 teaching, tutoring, corporate training, or workshop facilitation all count)
 • Strong writing and content development skills — you can turn complex ideas into clear, learner-friendly material
-• Must have experience building SCORM or xAPI-compliant content packages for LMS delivery
-• Required: experience with a corporate LMS (Cornerstone OnDemand, Workday Learning, or similar) — Canvas and Google Classroom do not qualify for this requirement
+• Must have: demonstrated experience building SCORM or xAPI content packages using an authoring tool. Canvas course-building does not qualify.
+• Must have: prior use of a corporate LMS in a professional setting (Cornerstone OnDemand, SAP SuccessFactors, Workday Learning, or similar). K-12 platforms such as Canvas LMS, Google Classroom, and Nearpod do not qualify.
 • Organized self-starter who can manage multiple projects simultaneously
 
 Preferred (not required):
@@ -697,6 +700,15 @@ export function EvalDashboard() {
                                           {result.engineOutput.recommendation.replace("_", " ")}
                                         </span>
                                       </div>
+                                      {result.engineOutput.mustHaveGapCount > 0 && (
+                                        <div className="mt-2 text-[11px] font-mono text-zinc-500 bg-zinc-900/60 border border-zinc-800 rounded-lg px-3 py-1.5 leading-relaxed">
+                                          <span className="text-zinc-400">Base composite:</span> <span className="text-white font-semibold">{result.engineOutput.baseComposite}</span>
+                                          <span className="mx-1.5 text-zinc-600">→</span>
+                                          <span className="text-red-400">Must-have gap penalty: −{result.engineOutput.penaltyPoints}</span>
+                                          <span className="mx-1.5 text-zinc-600">→</span>
+                                          <span className="text-zinc-400">Final:</span> <span className="text-white font-semibold">{result.engineOutput.matchScore}</span>
+                                        </div>
+                                      )}
                                     </div>
 
                                     <div className="space-y-2">

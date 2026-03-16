@@ -159,16 +159,18 @@ ${jobDescription}
     }
 
     // Compute matchScore and recommendation server-side
-    let matchScore = Math.round(
+    const baseComposite = Math.round(
       (evaluation.skillsScore * 0.4) + (evaluation.seniorityScore * 0.3) + (evaluation.domainScore * 0.3)
     );
 
     // Must-have penalty: 15% per unmet must-have requirement, capped at 40%
     const mustHaveGapCount = evaluation.mustHaveGapCount ?? 0;
+    let matchScore = baseComposite;
     if (mustHaveGapCount > 0) {
       const penalty = Math.min(mustHaveGapCount * 0.15, 0.4);
-      matchScore = Math.round(matchScore * (1 - penalty));
+      matchScore = Math.round(baseComposite * (1 - penalty));
     }
+    const penaltyPoints = baseComposite - matchScore;
 
     let recommendation: string;
     if (matchScore >= 80) recommendation = "STRONG_FIT";
@@ -177,7 +179,7 @@ ${jobDescription}
     else if (matchScore >= 25) recommendation = "WEAK_FIT";
     else recommendation = "DO_NOT_APPLY";
 
-    return res.status(200).json({ ...evaluation, matchScore, recommendation });
+    return res.status(200).json({ ...evaluation, matchScore, recommendation, baseComposite, penaltyPoints, mustHaveGapCount });
 
   } catch (error: any) {
     console.error("Evaluation error:", error);
