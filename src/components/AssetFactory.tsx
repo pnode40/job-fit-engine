@@ -9,6 +9,8 @@ import {
   RotateCcw,
   FileText,
   BookOpen,
+  Pencil,
+  Eye,
 } from "lucide-react";
 import Markdown from "react-markdown";
 import { Button } from "./ui/button";
@@ -28,6 +30,7 @@ interface AssetFactoryProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   onUpdateResume: (markdown: string) => void;
+  onUpdateCoverLetter: (markdown: string) => void;
   onNewApplication: () => void;
 }
 
@@ -57,9 +60,12 @@ export function AssetFactory({
   activeTab,
   setActiveTab,
   onUpdateResume,
+  onUpdateCoverLetter,
   onNewApplication,
 }: AssetFactoryProps) {
   const [localResume, setLocalResume] = useState(documents.resumeMarkdown);
+  const [localCoverLetter, setLocalCoverLetter] = useState(documents.coverLetterMarkdown);
+  const [isCoverEditing, setIsCoverEditing] = useState(false);
 
   // Insert blank lines after italic job header lines like *Title | Date | Location*
   // so they render as separate paragraphs and don't merge with the description text.
@@ -303,14 +309,60 @@ export function AssetFactory({
               </motion.div>
             </AnimatePresence>
           )}
-          <div className="flex justify-end">
-            <Button variant="ghost" size="sm" onClick={() => copy(documents.coverLetterMarkdown, "cover")} className="text-zinc-500 hover:text-zinc-300 text-xs h-7">
+          <div className="flex items-center justify-between">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                if (isCoverEditing) {
+                  onUpdateCoverLetter(localCoverLetter);
+                }
+                setIsCoverEditing((v) => !v);
+              }}
+              className={cn(
+                "text-xs h-7 transition-colors",
+                isCoverEditing
+                  ? "bg-blue-600/20 border-blue-500/40 text-blue-300 hover:bg-blue-600/30"
+                  : "bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-white"
+              )}
+            >
+              {isCoverEditing
+                ? <><Eye className="w-3.5 h-3.5 mr-1.5" /> Done Editing</>
+                : <><Pencil className="w-3.5 h-3.5 mr-1.5" /> Edit</>
+              }
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => copy(localCoverLetter, "cover")} className="text-zinc-500 hover:text-zinc-300 text-xs h-7">
               {copiedCover ? <><Check className="w-3.5 h-3.5 mr-1.5" /> Copied</> : <><Copy className="w-3.5 h-3.5 mr-1.5" /> Copy Markdown</>}
             </Button>
           </div>
-          <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-2xl p-8 md:p-12 prose prose-invert max-w-none prose-sm shadow-xl">
-            <Markdown>{documents.coverLetterMarkdown}</Markdown>
-          </div>
+          <AnimatePresence mode="wait">
+            {isCoverEditing ? (
+              <motion.div
+                key="cover-edit"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
+              >
+                <Textarea
+                  value={localCoverLetter}
+                  onChange={(e) => setLocalCoverLetter(e.target.value)}
+                  className="min-h-[520px] bg-zinc-950/60 border-zinc-800 text-zinc-300 font-mono text-sm leading-relaxed focus-visible:ring-1 focus-visible:ring-blue-500/50 resize-y rounded-2xl p-6"
+                />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="cover-preview"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
+                className="bg-zinc-900/30 border border-zinc-800/50 rounded-2xl p-8 md:p-12 prose prose-invert max-w-none prose-sm shadow-xl"
+              >
+                <Markdown>{localCoverLetter}</Markdown>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </TabsContent>
 
         {/* Playbook */}
