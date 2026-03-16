@@ -1,6 +1,9 @@
 export interface JobFitEvaluation {
   levelingAnalysis: string;
   matchScore: number;
+  baseComposite: number;
+  penaltyPoints: number;
+  mustHaveGapCount: number;
   skillsScore: number;
   seniorityScore: number;
   domainScore: number;
