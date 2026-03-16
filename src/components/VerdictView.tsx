@@ -10,6 +10,7 @@ import {
   RotateCcw,
   Sparkles,
   AlertTriangle,
+  ShieldAlert,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
@@ -241,6 +242,27 @@ export function VerdictView({
                 </div>
               ))}
             </div>
+
+            {/* Must-have gap penalty breakdown — only shown when a penalty was applied */}
+            {evaluation.mustHaveGapCount > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="flex items-center gap-2 bg-red-950/20 border border-red-800/30 rounded-xl px-3 py-2 text-[11px] font-mono"
+              >
+                <ShieldAlert className="w-3.5 h-3.5 text-red-400 shrink-0" />
+                <span className="text-zinc-500">Base composite:</span>
+                <span className="text-white font-semibold">{evaluation.baseComposite}</span>
+                <span className="text-zinc-700 mx-0.5">→</span>
+                <span className="text-red-400">
+                  {evaluation.mustHaveGapCount} must-have gap{evaluation.mustHaveGapCount !== 1 ? "s" : ""} −{evaluation.penaltyPoints}
+                </span>
+                <span className="text-zinc-700 mx-0.5">→</span>
+                <span className="text-zinc-500">Final:</span>
+                <span className="text-white font-semibold">{evaluation.matchScore}</span>
+              </motion.div>
+            )}
 
             {/* Reasoning */}
             <p className="text-xs text-zinc-400 leading-relaxed bg-black/20 rounded-xl p-3 border border-white/5">
