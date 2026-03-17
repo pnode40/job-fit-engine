@@ -1,6 +1,6 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenAI } from "@google/genai";
-import { checkRateLimit } from "./_ratelimit";
+import { checkRateLimit } from "../lib/ratelimit";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // 0. Rate Limiting
