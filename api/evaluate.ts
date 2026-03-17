@@ -88,7 +88,7 @@ ${jobDescription}
       model: "gemini-2.5-pro",
       contents: prompt,
       config: {
-        temperature: 0.1,
+        temperature: 0,
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
