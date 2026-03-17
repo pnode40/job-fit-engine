@@ -1,6 +1,9 @@
 {
   "buildCommand": "vite build",
   "outputDirectory": "dist",
+  "github": {
+    "productionBranch": "main"
+  },
   "rewrites": [
     { "source": "/api/evaluate", "destination": "/api/evaluate" },
     { "source": "/api/generate", "destination": "/api/generate" },
