@@ -5,6 +5,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const allowedOrigins = [
     process.env.ALLOWED_ORIGIN,
     process.env.APP_URL,
+    'https://job-fit-engine-six-steel.vercel.app',
+    'https://job-fit-engine-six.vercel.app',
+    'https://job-fit-engine-six-eric-patnoudes-s-projects.vercel.app',
     'http://localhost:3000',
     'http://localhost:5173',
   ].filter(Boolean) as string[];
@@ -78,6 +81,6 @@ ${fixture.jobDescription}`;
 
   } catch (error: any) {
     console.error('Eval judge error:', error);
-    return res.status(500).json({ error: error.message || 'Judge call failed' });
+    return res.status(500).json({ error: 'Judge evaluation failed. Please try again.' });
   }
 }

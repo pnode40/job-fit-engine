@@ -106,6 +106,10 @@ export function AssetFactory({
   };
 
   const handleSandboxSave = () => {
+    if (!sandboxOriginal.trim()) {
+      setSandboxOpen(false);
+      return;
+    }
     if (sandboxOriginal === sandboxEdit) {
       setSandboxOpen(false);
       return;

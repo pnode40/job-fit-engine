@@ -4,6 +4,11 @@ import { createServer as createViteServer } from "vite";
 import evaluateHandler from "../api/evaluate";
 import generateHandler from "../api/generate";
 
+if (!process.env.GEMINI_API_KEY) {
+  console.error('FATAL: GEMINI_API_KEY is not set');
+  process.exit(1);
+}
+
 async function startServer() {
   const app = express();
   const PORT = 3000;
