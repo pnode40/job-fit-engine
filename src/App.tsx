@@ -79,6 +79,27 @@ export default function App() {
     localStorage.setItem("job-fit-master-dossier", content);
   };
 
+  // Safari-safe file helpers — FileReader works back to iOS 6
+  const readFileAsArrayBuffer = (file: File): Promise<ArrayBuffer> => {
+    if (typeof file.arrayBuffer === "function") return file.arrayBuffer();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as ArrayBuffer);
+      reader.onerror = () => reject(reader.error);
+      reader.readAsArrayBuffer(file);
+    });
+  };
+
+  const readFileAsText = (file: File): Promise<string> => {
+    if (typeof file.text === "function") return file.text();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(reader.error);
+      reader.readAsText(file);
+    });
+  };
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -89,7 +110,7 @@ export default function App() {
 
       if (fileName.endsWith(".pdf")) {
         // Extract text from PDF preserving line structure
-        const arrayBuffer = await file.arrayBuffer();
+        const arrayBuffer = await readFileAsArrayBuffer(file);
         const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
         const pageTexts: string[] = [];
 
@@ -109,12 +130,12 @@ export default function App() {
         text = pageTexts.join("\n\n");
       } else if (fileName.endsWith(".docx")) {
         // Extract text from Word document
-        const arrayBuffer = await file.arrayBuffer();
+        const arrayBuffer = await readFileAsArrayBuffer(file);
         const result = await mammoth.extractRawText({ arrayBuffer });
         text = result.value;
       } else {
         // Plain text files (.txt, .md, .csv)
-        text = await file.text();
+        text = await readFileAsText(file);
       }
 
       handleSaveDossier(dossierContent ? `${dossierContent}\n\n${text}` : text);
