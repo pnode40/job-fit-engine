@@ -15,7 +15,7 @@ export default defineConfig({
     target: 'es2020',
   },
   optimizeDeps: {
-    include: ['pdfjs-dist', 'mammoth'],
+    include: [],
   },
   server: {
     // HMR is disabled in AI Studio via DISABLE_HMR env var.

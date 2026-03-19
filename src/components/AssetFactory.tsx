@@ -114,7 +114,7 @@ export function AssetFactory({
       setSandboxOpen(false);
       return;
     }
-    const updated = localResume.replaceAll(sandboxOriginal, sandboxEdit);
+    const updated = localResume.split(sandboxOriginal).join(sandboxEdit);
     setLocalResume(updated);
     onUpdateResume(updated);
     setSandboxOpen(false);

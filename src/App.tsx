@@ -22,14 +22,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { IngestionView, GENERATION_PHASES } from "./components/IngestionView";
 import { VerdictView } from "./components/VerdictView";
 import { AssetFactory } from "./components/AssetFactory";
-import * as pdfjsLib from "pdfjs-dist";
-import * as mammoth from "mammoth";
-
-// Configure PDF.js worker using local bundled file (v5 is .mjs only)
-pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-  "pdfjs-dist/build/pdf.worker.min.mjs",
-  import.meta.url
-).href;
+// pdfjs-dist and mammoth are lazy-loaded only when needed (see handleFileUpload).
+// This avoids loading 1.5MB+ of Safari-incompatible pdfjs code on every page view.
 
 function getTier(score: number): 1 | 2 | 3 | 4 {
   if (score >= 90) return 1;
@@ -109,7 +103,13 @@ export default function App() {
       const fileName = file.name.toLowerCase();
 
       if (fileName.endsWith(".pdf")) {
-        // Extract text from PDF preserving line structure
+        // Lazy-load pdfjs-dist only when a PDF is actually uploaded
+        const pdfjsLib = await import("pdfjs-dist");
+        pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+          "pdfjs-dist/build/pdf.worker.min.mjs",
+          import.meta.url
+        ).href;
+
         const arrayBuffer = await readFileAsArrayBuffer(file);
         const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
         const pageTexts: string[] = [];
@@ -117,7 +117,6 @@ export default function App() {
         for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
           const page = await pdf.getPage(pageNum);
           const content = await page.getTextContent();
-          // Use hasEOL flag to preserve line breaks rather than joining everything with spaces
           let pageText = "";
           for (const item of content.items as any[]) {
             pageText += item.str;
@@ -129,7 +128,8 @@ export default function App() {
 
         text = pageTexts.join("\n\n");
       } else if (fileName.endsWith(".docx")) {
-        // Extract text from Word document
+        // Lazy-load mammoth only when a .docx is actually uploaded
+        const mammoth = await import("mammoth");
         const arrayBuffer = await readFileAsArrayBuffer(file);
         const result = await mammoth.extractRawText({ arrayBuffer });
         text = result.value;
