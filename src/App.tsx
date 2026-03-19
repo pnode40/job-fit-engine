@@ -104,7 +104,9 @@ export default function App() {
 
       if (fileName.endsWith(".pdf")) {
         // Lazy-load pdfjs-dist only when a PDF is actually uploaded
-        const pdfjsLib = await import("pdfjs-dist");
+        // Dynamic import wraps CJS/ESM modules — resolve default export if present
+        const pdfjsMod = await import("pdfjs-dist");
+        const pdfjsLib = (pdfjsMod as any).default || pdfjsMod;
         pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
           "pdfjs-dist/build/pdf.worker.min.mjs",
           import.meta.url
@@ -129,7 +131,9 @@ export default function App() {
         text = pageTexts.join("\n\n");
       } else if (fileName.endsWith(".docx")) {
         // Lazy-load mammoth only when a .docx is actually uploaded
-        const mammoth = await import("mammoth");
+        // mammoth is CJS — dynamic import wraps it in { default: ... }
+        const mammothMod = await import("mammoth");
+        const mammoth = (mammothMod as any).default || mammothMod;
         const arrayBuffer = await readFileAsArrayBuffer(file);
         const result = await mammoth.extractRawText({ arrayBuffer });
         text = result.value;
