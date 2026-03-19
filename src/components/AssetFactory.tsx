@@ -121,13 +121,35 @@ export function AssetFactory({
   };
 
   const copy = async (text: string, type: "resume" | "cover" | "playbook") => {
-    try {
-      await navigator.clipboard.writeText(text);
+    const markCopied = () => {
       if (type === "resume") { setCopiedResume(true); setTimeout(() => setCopiedResume(false), 2000); }
       else if (type === "cover") { setCopiedCover(true); setTimeout(() => setCopiedCover(false), 2000); }
       else { setCopiedPlaybook(true); setTimeout(() => setCopiedPlaybook(false), 2000); }
+    };
+    // Modern clipboard API (Chrome, Safari 13.1+)
+    if (navigator.clipboard && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(text);
+        markCopied();
+        return;
+      } catch {
+        // fall through to execCommand fallback
+      }
+    }
+    // execCommand fallback for older Safari / non-secure contexts
+    const el = document.createElement("textarea");
+    el.value = text;
+    el.style.cssText = "position:fixed;top:-9999px;left:-9999px;opacity:0";
+    document.body.appendChild(el);
+    el.focus();
+    el.select();
+    try {
+      const ok = document.execCommand("copy");
+      if (ok) { markCopied(); } else { alert("Clipboard access denied. Please copy the text manually."); }
     } catch {
       alert("Clipboard access denied. Please copy the text manually.");
+    } finally {
+      document.body.removeChild(el);
     }
   };
 

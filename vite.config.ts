@@ -12,6 +12,7 @@ export default defineConfig({
   },
   build: {
     sourcemap: false,
+    target: 'es2020',
   },
   optimizeDeps: {
     include: ['pdfjs-dist', 'mammoth'],
