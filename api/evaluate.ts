@@ -34,6 +34,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
+  const startTime = Date.now();
+  console.log(JSON.stringify({ event: "request_start", endpoint: "/api/evaluate", timestamp: new Date().toISOString() }));
+
   try {
     const { dossier, jobDescription } = req.body || {};
     const apiKey = process.env.GEMINI_API_KEY;
@@ -148,7 +151,13 @@ ${jobDescription}
     const text = response.text;
     if (!text) throw new Error("No response from AI");
 
-    const evaluation = JSON.parse(text);
+    let evaluation;
+    try {
+      evaluation = JSON.parse(text);
+    } catch (parseError) {
+      console.error("Failed to parse AI response:", parseError, "Raw text:", text);
+      return res.status(502).json({ error: 'AI returned an invalid response. Please try again.' });
+    }
 
     // Validate required numeric fields are present and in range
     const requiredFields = ['skillsScore', 'seniorityScore', 'domainScore'];
@@ -183,10 +192,11 @@ ${jobDescription}
     else if (matchScore >= 25) recommendation = "WEAK_FIT";
     else recommendation = "DO_NOT_APPLY";
 
+    console.log(JSON.stringify({ event: "request_success", endpoint: "/api/evaluate", duration_ms: Date.now() - startTime, timestamp: new Date().toISOString() }));
     return res.status(200).json({ ...evaluation, matchScore, recommendation, baseComposite, penaltyPoints, mustHaveGapCount });
 
   } catch (error: any) {
-    console.error("Evaluation error:", error);
+    console.error(JSON.stringify({ event: "request_error", endpoint: "/api/evaluate", duration_ms: Date.now() - startTime, error: String(error), timestamp: new Date().toISOString() }));
     return res.status(500).json({ error: 'Evaluation failed. Please try again.' });
   }
 }

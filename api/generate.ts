@@ -34,6 +34,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
+  const startTime = Date.now();
+  console.log(JSON.stringify({ event: "request_start", endpoint: "/api/generate", timestamp: new Date().toISOString() }));
+
   try {
     const { dossier, jobDescription } = req.body || {};
     const apiKey = process.env.GEMINI_API_KEY;
@@ -138,6 +141,7 @@ ${jobDescription}
       model: "gemini-2.5-pro",
       contents: prompt,
       config: {
+        temperature: 0.3,
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
@@ -163,7 +167,13 @@ ${jobDescription}
     const text = response.text;
     if (!text) throw new Error("No response from AI");
 
-    const documents = JSON.parse(text);
+    let documents;
+    try {
+      documents = JSON.parse(text);
+    } catch (parseError) {
+      console.error("Failed to parse AI response:", parseError, "Raw text:", text);
+      return res.status(502).json({ error: 'AI returned an invalid response. Please try again.' });
+    }
 
     // Validate all three documents are non-empty strings
     const docFields = ['resumeMarkdown', 'coverLetterMarkdown', 'interviewPlaybookMarkdown'];
@@ -173,10 +183,11 @@ ${jobDescription}
       }
     }
 
+    console.log(JSON.stringify({ event: "request_success", endpoint: "/api/generate", duration_ms: Date.now() - startTime, timestamp: new Date().toISOString() }));
     return res.status(200).json(documents);
 
   } catch (error: any) {
-    console.error("Generation error:", error);
+    console.error(JSON.stringify({ event: "request_error", endpoint: "/api/generate", duration_ms: Date.now() - startTime, error: String(error), timestamp: new Date().toISOString() }));
     return res.status(500).json({ error: 'Document generation failed. Please try again.' });
   }
 }

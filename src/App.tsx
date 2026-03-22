@@ -22,8 +22,20 @@ import { motion, AnimatePresence } from "framer-motion";
 import { IngestionView, GENERATION_PHASES } from "./components/IngestionView";
 import { VerdictView } from "./components/VerdictView";
 import { AssetFactory } from "./components/AssetFactory";
+import { useToast } from "./components/Toast";
 // pdfjs-dist and mammoth are lazy-loaded only when needed (see handleFileUpload).
 // This avoids loading 1.5MB+ of Safari-incompatible pdfjs code on every page view.
+
+// Fix 3: Safe localStorage helpers
+function safeGetItem(key: string): string | null {
+  try { return localStorage.getItem(key); } catch { return null; }
+}
+function safeSetItem(key: string, value: string): void {
+  try { localStorage.setItem(key, value); } catch { /* storage unavailable */ }
+}
+function safeRemoveItem(key: string): void {
+  try { localStorage.removeItem(key); } catch { /* storage unavailable */ }
+}
 
 function getTier(score: number): 1 | 2 | 3 | 4 {
   if (score >= 90) return 1;
@@ -32,7 +44,18 @@ function getTier(score: number): 1 | 2 | 3 | 4 {
   return 4;
 }
 
+// Fix 2: File validation constants
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const ALLOWED_MIME_TYPES = [
+  'application/pdf',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'text/plain',
+  'text/markdown',
+  'text/csv',
+];
+
 export default function App() {
+  const toast = useToast();
   const [dossierContent, setDossierContent] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [activeStep, setActiveStep] = useState(1);
@@ -45,21 +68,27 @@ export default function App() {
   const [documents, setDocuments] = useState<GeneratedDocuments | null>(null);
   const [pitchMode, setPitchMode] = useState(false);
 
+  // Fix 2: File processing state
+  const [fileProcessing, setFileProcessing] = useState(false);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Fix 4: Rate limiting ref
+  const lastCallRef = useRef<number>(0);
+
   useEffect(() => {
-    const savedDossier = localStorage.getItem("job-fit-master-dossier");
+    const savedDossier = safeGetItem("job-fit-master-dossier");
     if (savedDossier) {
       setDossierContent(savedDossier);
     } else {
-      const savedProfiles = localStorage.getItem("job-fit-profiles");
+      const savedProfiles = safeGetItem("job-fit-profiles");
       if (savedProfiles) {
         try {
           const parsed = JSON.parse(savedProfiles);
           if (parsed && parsed.length > 0) {
             setDossierContent(parsed[0].content);
-            localStorage.setItem("job-fit-master-dossier", parsed[0].content);
-            localStorage.removeItem("job-fit-profiles");
+            safeSetItem("job-fit-master-dossier", parsed[0].content);
+            safeRemoveItem("job-fit-profiles");
           }
         } catch (e) {
           console.error("Failed to parse legacy profiles", e);
@@ -70,7 +99,7 @@ export default function App() {
 
   const handleSaveDossier = (content: string) => {
     setDossierContent(content);
-    localStorage.setItem("job-fit-master-dossier", content);
+    safeSetItem("job-fit-master-dossier", content);
   };
 
   // Safari-safe file helpers — FileReader works back to iOS 6
@@ -98,6 +127,21 @@ export default function App() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Fix 2: File size validation
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error("File is too large. Maximum file size is 10MB.");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    // Fix 2: File type validation
+    if (!ALLOWED_MIME_TYPES.includes(file.type) && file.type !== '') {
+      toast.error("Unsupported file type. Please upload a PDF, Word document (.docx), or text file (.txt, .md, .csv).");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    setFileProcessing(true);
     try {
       let text = "";
       const fileName = file.name.toLowerCase();
@@ -145,14 +189,26 @@ export default function App() {
       handleSaveDossier(dossierContent ? `${dossierContent}\n\n${text}` : text);
     } catch (error) {
       console.error("File upload error:", error);
-      alert(`Failed to process file: ${error instanceof Error ? error.message : "Unknown error"}`);
+      toast.error(`Failed to process file: ${error instanceof Error ? error.message : "Unknown error"}`);
+    } finally {
+      setFileProcessing(false);
     }
 
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleEvaluate = async () => {
+    // Fix 5: Double-submit guard
+    if (isEvaluating) return;
     if (!dossierContent || !jobDescription) return;
+
+    // Fix 4: Rate limiting guard
+    if (Date.now() - lastCallRef.current < 5000) {
+      toast.warning("Please wait a few seconds between requests.");
+      return;
+    }
+    lastCallRef.current = Date.now();
+
     setIsEvaluating(true);
     setEvaluation(null);
     setDocuments(null);
@@ -161,14 +217,24 @@ export default function App() {
       setEvaluation(result);
     } catch (error: unknown) {
       console.error("Evaluation failed:", error);
-      alert(`Failed to evaluate job fit: ${error instanceof Error ? error.message : error}`);
+      toast.error(`Failed to evaluate job fit: ${error instanceof Error ? error.message : error}`);
     } finally {
       setIsEvaluating(false);
     }
   };
 
   const handleGenerate = async (isPitch = false) => {
+    // Fix 5: Double-submit guard
+    if (isGenerating) return;
     if (!dossierContent || !jobDescription) return;
+
+    // Fix 4: Rate limiting guard
+    if (Date.now() - lastCallRef.current < 5000) {
+      toast.warning("Please wait a few seconds between requests.");
+      return;
+    }
+    lastCallRef.current = Date.now();
+
     setPitchMode(isPitch);
     setIsGenerating(true);
     try {
@@ -177,7 +243,7 @@ export default function App() {
       setActiveTab(isPitch ? "coverLetter" : "resume");
     } catch (error: unknown) {
       console.error("Document generation failed:", error);
-      alert(`Failed to generate documents: ${error instanceof Error ? error.message : error}`);
+      toast.error(`Failed to generate documents: ${error instanceof Error ? error.message : error}`);
     } finally {
       setIsGenerating(false);
     }
@@ -395,13 +461,15 @@ export default function App() {
                       className="hidden"
                       ref={fileInputRef}
                       onChange={handleFileUpload}
+                      disabled={fileProcessing}
                     />
                     <Button
                       variant="outline"
                       onClick={() => fileInputRef.current?.click()}
+                      disabled={fileProcessing}
                       className="bg-zinc-900 border-zinc-800 hover:bg-zinc-800 text-zinc-300"
                     >
-                      <Upload className="w-4 h-4 mr-2" /> Upload PDF or Word Doc
+                      <Upload className="w-4 h-4 mr-2" /> {fileProcessing ? "Processing..." : "Upload PDF or Word Doc"}
                     </Button>
                     <div className="flex-1" />
                     <Button

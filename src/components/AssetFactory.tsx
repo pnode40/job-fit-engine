@@ -21,6 +21,7 @@ import { Badge } from "./ui/badge";
 import { cn } from "../lib/utils";
 import type { GeneratedDocuments, JobFitEvaluation } from "../services/ai";
 import { useReactToPrint } from "react-to-print";
+import { useToast } from "./Toast";
 
 interface AssetFactoryProps {
   documents: GeneratedDocuments;
@@ -63,6 +64,7 @@ export function AssetFactory({
   onUpdateCoverLetter,
   onNewApplication,
 }: AssetFactoryProps) {
+  const toast = useToast();
   const [localResume, setLocalResume] = useState(documents.resumeMarkdown);
   const [localCoverLetter, setLocalCoverLetter] = useState(documents.coverLetterMarkdown);
   const [isCoverEditing, setIsCoverEditing] = useState(false);
@@ -145,9 +147,9 @@ export function AssetFactory({
     el.select();
     try {
       const ok = document.execCommand("copy");
-      if (ok) { markCopied(); } else { alert("Clipboard access denied. Please copy the text manually."); }
+      if (ok) { markCopied(); } else { toast.warning("Clipboard access denied. Please copy the text manually."); }
     } catch {
-      alert("Clipboard access denied. Please copy the text manually.");
+      toast.warning("Clipboard access denied. Please copy the text manually.");
     } finally {
       document.body.removeChild(el);
     }
