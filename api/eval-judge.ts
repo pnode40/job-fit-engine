@@ -16,6 +16,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const isAllowed = !origin || allowedOrigins.includes(origin);
   if (!isAllowed) return res.status(403).json({ error: 'Forbidden' });
 
+  // Require a shared secret so this internal eval harness isn't publicly callable
+  const evalSecret = process.env.EVAL_SECRET;
+  if (evalSecret && req.headers['x-eval-secret'] !== evalSecret) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
   res.setHeader('Access-Control-Allow-Origin', origin ?? 'http://localhost:3000');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -29,6 +35,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (!apiKey) return res.status(500).json({ error: 'Missing API Key' });
     if (!fixture || !engineOutput) return res.status(400).json({ error: 'Missing fixture or engineOutput' });
+
+    const MAX_CHARS = 50_000;
+    if (typeof fixture.resume === 'string' && fixture.resume.length > MAX_CHARS) {
+      return res.status(400).json({ error: `fixture.resume exceeds maximum length of ${MAX_CHARS} characters` });
+    }
+    if (typeof fixture.jobDescription === 'string' && fixture.jobDescription.length > MAX_CHARS) {
+      return res.status(400).json({ error: `fixture.jobDescription exceeds maximum length of ${MAX_CHARS} characters` });
+    }
 
     const ai = new GoogleGenAI({ apiKey });
 
